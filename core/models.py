@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -56,3 +58,36 @@ class PomodoroSession(models.Model):
 
     class Meta:
         ordering = ["-started_at"] # descending order by started_at
+
+class Flashcard(models.Model):
+    subject          = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="flashcards")
+    front            = models.TextField()           # question
+    back             = models.TextField()           # answer
+    next_review_date = models.DateField(default=date.today)
+    interval_days    = models.IntegerField(default=1)   # current interval in days
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Card: {self.front[:50]} ({self.subject.name})"
+
+    def is_due_today(self):
+        return self.next_review_date <= date.today()
+
+    def apply_review(self, rating):
+        """
+        Simplified SRS algorithm.
+        rating: 'easy' | 'hard' | 'wrong'
+        Updates interval_days and next_review_date.
+        """
+        if rating == "easy":
+            self.interval_days = max(self.interval_days * 2, 7)
+        elif rating == "hard":
+            self.interval_days = max(self.interval_days, 2)
+        else:  # wrong
+            self.interval_days = 1
+
+        self.next_review_date = date.today() + timedelta(days=self.interval_days)
+        self.save()
+
+    class Meta:
+        ordering = ["next_review_date"]
