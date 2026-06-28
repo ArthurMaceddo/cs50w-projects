@@ -27,3 +27,18 @@ class Topic(models.Model):
 
     class Meta:
         ordering = ["order", "created_at"]
+
+
+class PomodoroSession(models.Model):
+    user             = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pomodoro_sessions")
+    subject          = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="pomodoro_sessions")
+    started_at       = models.DateTimeField()
+    duration_minutes = models.IntegerField(default=25)
+    completed        = models.BooleanField(default=False)
+
+    def __str__(self):
+        status = "✅" if self.completed else "⏳"
+        return f"{status} {self.subject.name} — {self.duration_minutes}min em {self.started_at:%d/%m/%Y}"
+
+    class Meta:
+        ordering = ["-started_at"] # descending order by started_at
