@@ -10,6 +10,20 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.user.username})"
+    
+
+    def progress(self):
+        """return the % of topics completed in this subject."""
+        topics = self.topics.all()
+        if not topics.exists():
+            return 0
+        completed = topics.filter(is_completed=True).count()
+        return int((completed / topics.count()) * 100)
+
+    def total_study_minutes(self):
+        """total study minutes for this subject based on completed pomodoro sessions."""
+        sessions = self.pomodoro_sessions.filter(completed=True)
+        return sum(s.duration_minutes for s in sessions)
 
     class Meta:
         ordering = ["name"]
