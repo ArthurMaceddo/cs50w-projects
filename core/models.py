@@ -13,3 +13,17 @@ class Subject(models.Model):
 
     class Meta:
         ordering = ["name"]
+
+class Topic(models.Model):
+    subject      = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="topics")
+    name         = models.CharField(max_length=200)
+    notes        = models.TextField(blank=True)
+    is_completed = models.BooleanField(default=False)
+    order        = models.PositiveIntegerField(default=0)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} — {self.subject.name}"
+
+    class Meta:
+        ordering = ["order", "created_at"]
