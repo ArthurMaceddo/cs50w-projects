@@ -91,3 +91,19 @@ class Flashcard(models.Model):
 
     class Meta:
         ordering = ["next_review_date"]
+
+class FlashcardReview(models.Model):
+    RATING_CHOICES = [
+        ("easy",  "Fácil"),
+        ("hard",  "Difícil"),
+        ("wrong", "Errei"),
+    ]
+    flashcard   = models.ForeignKey(Flashcard, on_delete=models.CASCADE, related_name="reviews")
+    rating      = models.CharField(max_length=10, choices=RATING_CHOICES)
+    reviewed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.flashcard} — {self.rating} em {self.reviewed_at:%d/%m/%Y}"
+
+    class Meta:
+        ordering = ["-reviewed_at"]
