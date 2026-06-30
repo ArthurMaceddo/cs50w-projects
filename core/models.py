@@ -54,7 +54,7 @@ class PomodoroSession(models.Model):
 
     def __str__(self):
         status = "✅" if self.completed else "⏳"
-        return f"{status} {self.subject.name} — {self.duration_minutes}min em {self.started_at:%d/%m/%Y}"
+        return f"{status} {self.subject.name} — {self.duration_minutes}min on {self.started_at:%d/%m/%Y}"
 
     class Meta:
         ordering = ["-started_at"] # descending order by started_at
@@ -103,7 +103,38 @@ class FlashcardReview(models.Model):
     reviewed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.flashcard} — {self.rating} em {self.reviewed_at:%d/%m/%Y}"
+        return f"{self.flashcard} — {self.rating} on {self.reviewed_at:%d/%m/%Y}"
 
     class Meta:
         ordering = ["-reviewed_at"]
+
+class WeeklyGoal(models.Model):
+    user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name="weekly_goals")
+    subject      = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="goals")
+    target_hours = models.FloatField()      # ex: 5.0 = 5 horas na semana
+    week_start   = models.DateField()       # sempre a segunda da semana
+
+    def __str__(self):
+        return f"{self.subject.name} — {self.target_hours}h — week of {self.week_start}"
+
+    def current_hours(self):
+        """Sum the duration of completed pomodoro sessions for this subject in the current week."""
+        week_end = self.week_start + timedelta(days=6)
+        sessions = PomodoroSession.objects.filter(
+            subject=self.subject,
+            user=self.user,
+            started_at__date__range=[self.week_start, week_end],
+            completed=True,
+        )
+        total_minutes = sum(s.duration_minutes for s in sessions)
+        return round(total_minutes / 60, 1)
+
+    def percentage(self):
+        """Return the percentage of the weekly goal achieved."""
+        if self.target_hours == 0:
+            return 0
+        return min(int((self.current_hours() / self.target_hours) * 100), 100)
+
+    class Meta:
+        ordering = ["week_start", "subject"]
+        unique_together = ["user", "subject", "week_start"]  
