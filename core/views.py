@@ -1,11 +1,12 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from django.contrib.auth import login, logout
 
-from core.models import Subject
+from core.models import Subject, Topic
 # Create your views here.
 # Auth
 def dashboard(request):
@@ -76,14 +77,36 @@ def subject_delete(request, pk):
     return render(request, "subjects/confirm_delete.html", {"subject": subject})
 
 # Topics -------------------------------------------------------------------
+# ─────────────────────────────────────────
+# TÓPICOS
+# ─────────────────────────────────────────
+
+@require_POST
 def topic_create(request):
-    return HttpResponse("Create topic placeholder")
+    subject_id = request.POST.get("subject_id")
+    name       = request.POST.get("name", "").strip()
+    notes      = request.POST.get("notes", "").strip()
+    subject    = get_object_or_404(Subject, pk=subject_id, user=request.user)
+    if name:
+        Topic.objects.create(subject=subject, name=name, notes=notes)
+    return redirect("subject_detail", pk=subject_id)
+
 
 def topic_toggle(request, pk):
-    return HttpResponse(f"Toggle topic {pk} placeholder")
+    """API: switch is_completed. Return JSON."""
+    topic = get_object_or_404(Topic, pk=pk, subject__user=request.user)
+    topic.is_completed = not topic.is_completed
+    topic.save()
+    return JsonResponse({
+        "completed": topic.is_completed,
+        "progress": topic.subject.progress(),
+    })
 
 def topic_delete(request, pk):
-    return HttpResponse(f"Delete topic {pk} placeholder")
+    topic = get_object_or_404(Topic, pk=pk, subject__user=request.user)
+    subject_pk = topic.subject.pk
+    topic.delete()
+    return JsonResponse({"deleted": True, "progress": Subject.objects.get(pk=subject_pk).progress()})
 
 # Flashcards -----------------------------------------------------------------
 def flashcard_list(request):

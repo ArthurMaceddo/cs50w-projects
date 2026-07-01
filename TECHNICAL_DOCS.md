@@ -265,7 +265,7 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 <hr>
 
-# feat Implement CRUD views for Subject model
+# feat(views): Implement CRUD views for Subject model
 
 - **`subjects_list(request)`**: Lista todas as matérias associadas ao usuário logado, garantindo isolamento de dados.
 - **`subject_create(request)`**: Processa a criação de uma nova matéria. Utiliza `.strip()` (serve para remover espaços em branco no início e no fim de uma string) e define um valor padrão para a cor caso não seja informada.
@@ -278,3 +278,21 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 - **Segurança (Data Isolation)**: Todas as queries filtram pelo `user=request.user`. Isso é crucial para que um usuário não consiga acessar ou manipular matérias de outro usuário ao manipular o ID (`pk`) na URL.
 - **User Experience (UX)**: A utilização do `messages` fornece confirmação visual ao usuário após cada ação (criação, edição ou deleção), elevando a usabilidade da aplicação.
 - **`get_object_or_404`**: Esta função é um atalho profissional do Django que retorna automaticamente uma página de erro 404 caso o objeto não exista ou não pertença ao usuário, evitando erros de servidor (`DoesNotExist`).
+
+<hr>
+
+# feat(views): Implement CRUD views for Topic model
+
+- **`topic_create(request)`**:
+  - Utiliza o decorador `@require_POST` para garantir que a criação ocorra apenas via envio de formulário.
+  - Valida a existência da matéria antes da criação, garantindo que o tópico seja vinculado corretamente ao usuário autenticado.
+- **`topic_toggle(request, pk)`**:
+  - Endpoint assíncrono (API) para alternar o status `is_completed`.
+  - Retorna um JSON contendo o novo estado e o percentual de progresso atualizado da matéria, permitindo atualização instantânea do front-end sem recarregar a página.
+- **`topic_delete(request, pk)`**:
+  - Remove o tópico e retorna um JSON com a confirmação de exclusão e o novo progresso da matéria pai.
+
+### Observações Técnicas
+
+- **Consistência de Dados**: Ao retornar o `progress()` dentro das respostas JSON de `toggle` e `delete`, você possibilita que a interface (dashboard ou página de detalhes) reflita o progresso real em tempo real sempre que uma interação ocorre.
+- **Segurança**: O filtro `subject__user=request.user` garante que, mesmo em uma API, um usuário só consiga manipular tópicos que pertencem às suas próprias matérias.
