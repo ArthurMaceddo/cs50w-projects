@@ -30,4 +30,9 @@ urlpatterns = [
     # ── Pomodoro ─────────────────────────────────
     path("pomodoro/", views.pomodoro, name="pomodoro"),
     path("pomodoro/save/", views.pomodoro_save, name="pomodoro_save"),
+
+    # ── Goals ────────────────────────────────────
+    path("goals/", views.goals_list, name="goals_list"),
+    path("goals/new/", views.goal_create, name="goal_create"),
+    path("goals/<int:pk>/delete/", views.goal_delete, name="goal_delete"),
 ]
