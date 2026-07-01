@@ -26,4 +26,8 @@ urlpatterns = [
     path("flashcards/review/", views.flashcard_review_session, name="flashcard_review"),
     path("flashcards/<int:pk>/delete/", views.flashcard_delete, name="flashcard_delete"),
     path("flashcards/<int:pk>/submit/", views.flashcard_submit_review, name="flashcard_submit"),
+
+    # ── Pomodoro ─────────────────────────────────
+    path("pomodoro/", views.pomodoro, name="pomodoro"),
+    path("pomodoro/save/", views.pomodoro_save, name="pomodoro_save"),
 ]
