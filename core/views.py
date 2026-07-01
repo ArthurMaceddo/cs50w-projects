@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -6,7 +9,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import login, logout
 
-from core.models import Subject, Topic
+from core.models import PomodoroSession, Subject, Topic
 # Create your views here.
 # Auth
 def dashboard(request):
@@ -124,12 +127,28 @@ def flashcard_delete(request, pk):
 def flashcard_submit_review(request, pk):
     return HttpResponse(f"Submit review for flashcard {pk} placeholder")
 
-# Pomodoro --------------------------------------------------------------------
-def pomodoro(request):
-    return HttpResponse("Pomodoro timer placeholder")
+# ─────────────────────────────────────────
+# POMODORO
+# ─────────────────────────────────────────
 
+def pomodoro(request):
+    subjects = Subject.objects.filter(user=request.user)
+    recent   = PomodoroSession.objects.filter(user=request.user, completed=True)[:10]
+    return render(request, "pomodoro/timer.html", {"subjects": subjects, "recent": recent})
+
+@require_POST
 def pomodoro_save(request):
-    return HttpResponse("Save pomodoro session placeholder")
+    """API: salva uma sessão Pomodoro concluída."""
+    data       = json.loads(request.body)
+    subject    = get_object_or_404(Subject, pk=data.get("subject_id"), user=request.user)
+    PomodoroSession.objects.create(
+        user=request.user,
+        subject=subject,
+        started_at=datetime.now(),
+        duration_minutes=data.get("duration_minutes", 25),
+        completed=True,
+    )
+    return JsonResponse({"saved": True})
 
 # Goals -----------------------------------------------------------------------
 def goals_list(request):

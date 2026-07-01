@@ -296,3 +296,21 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 - **Consistência de Dados**: Ao retornar o `progress()` dentro das respostas JSON de `toggle` e `delete`, você possibilita que a interface (dashboard ou página de detalhes) reflita o progresso real em tempo real sempre que uma interação ocorre.
 - **Segurança**: O filtro `subject__user=request.user` garante que, mesmo em uma API, um usuário só consiga manipular tópicos que pertencem às suas próprias matérias.
+
+<hr>
+
+# feat(views): implement Pomodoro session management
+
+- **`pomodoro(request)`**:
+  - Renderiza o timer.
+  - Carrega a lista de matérias (`subjects`) para o usuário associar o tempo de estudo.
+  - Busca as últimas 10 sessões concluídas (`recent`) para exibir um histórico rápido de produtividade.
+- **`pomodoro_save(request)`**:
+  - Processa o JSON enviado pelo timer ao finalizar a contagem.
+  - Persiste a instância de `PomodoroSession` vinculando-a ao usuário e à matéria selecionada.
+
+### Observações Técnicas
+
+- **`json.loads(request.body)`**: Como o Pomodoro é um timer que roda no cliente (JavaScript), o `pomodoro_save` espera um `POST` contendo dados estruturados em JSON em vez de um formulário padrão. Isso oferece maior flexibilidade para o seu front-end.
+- **Data/Hora**: A utilização de `datetime.now()` registra o momento exato da finalização (ou salvamento) no servidor. Dependendo do seu deploy, considere utilizar `django.utils.timezone.now()` para manter a consistência de fusos horários globalmente.
+- **Segurança**: Assim como nas outras rotas, a validação `user=request.user` garante que apenas sessões legítimas sejam criadas, protegendo seus dados de Analytics contra requisições maliciosas.
