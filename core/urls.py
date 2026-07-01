@@ -20,4 +20,10 @@ urlpatterns = [
     path("topics/new/", views.topic_create, name="topic_create"),
     path("topics/<int:pk>/toggle/", views.topic_toggle, name="topic_toggle"),
     path("topics/<int:pk>/delete/", views.topic_delete, name="topic_delete"),
+
+    path("flashcards/", views.flashcard_list, name="flashcard_list"),
+    path("flashcards/new/", views.flashcard_create, name="flashcard_create"),
+    path("flashcards/review/", views.flashcard_review_session, name="flashcard_review"),
+    path("flashcards/<int:pk>/delete/", views.flashcard_delete, name="flashcard_delete"),
+    path("flashcards/<int:pk>/submit/", views.flashcard_submit_review, name="flashcard_submit"),
 ]
