@@ -15,4 +15,9 @@ urlpatterns = [
     path("subjects/<int:pk>/", views.subject_detail, name="subject_detail"),
     path("subjects/<int:pk>/edit/", views.subject_edit, name="subject_edit"),
     path("subjects/<int:pk>/delete/", views.subject_delete, name="subject_delete"),
+
+    # ── Topics (API by fetch) ────────────────────
+    path("topics/new/", views.topic_create, name="topic_create"),
+    path("topics/<int:pk>/toggle/", views.topic_toggle, name="topic_toggle"),
+    path("topics/<int:pk>/delete/", views.topic_delete, name="topic_delete"),
 ]
