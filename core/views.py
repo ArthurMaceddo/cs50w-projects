@@ -1,13 +1,31 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-
+from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.contrib.auth import login, logout
 # Create your views here.
 # Auth
 def dashboard(request):
     return HttpResponse("Dashboard placeholder")
 
+# AUTH
 def register(request):
-    return HttpResponse("Register placeholder")
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Account created successfully! Welcome to Study Manager.")
+            return redirect("dashboard")
+    else:
+        form = UserCreationForm()
+    return render(request, "register.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("index"))
 
 # Subjects -----------------------------------------------------------------
 def subjects_list(request):

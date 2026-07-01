@@ -246,3 +246,19 @@ https://codingnomads.com/what-is-path-converter - Patch Converter
 - **Objetivo**: Estabelecer o contrato entre as URLs definidas e a lógica de negócio, garantindo que o servidor Django inicie sem erros de importação (`ImportError` ou `AttributeError`).
 - **Implementação**: Criação de funções básicas para todos os módulos (Auth, Subjects, Topics, Flashcards, Pomodoro, Goals e Analytics), retornando `HttpResponse` temporários para validar a conectividade de cada endpoint.
 - **Manutenibilidade**: Este esqueleto serve como a base para o desenvolvimento incremental, permitindo que cada funcionalidade seja preenchida com a lógica real de banco de dados e templates de forma isolada e segura.
+
+<hr>
+
+# feat(auth): implement registration and logout logic
+
+- **`register(request)`**:
+  - **POST**: Processa o `UserCreationForm`. Se válido, salva o usuário, realiza o login automático e redireciona para o `dashboard`, exibindo uma mensagem de sucesso via `django.contrib.messages`.
+  - **GET**: Exibe um formulário em branco para o cadastro.
+- **`logout_view(request)`**:
+  - Encerra a sessão do usuário atual e redireciona para a página inicial (`index`), garantindo a limpeza dos dados de sessão no servidor.
+
+### Observação Técnica
+
+- **Segurança**: O uso de `UserCreationForm` (nativo do Django) é a prática recomendada, pois ele já cuida da validação de senhas, verificação de força e sanitização de dados, prevenindo vulnerabilidades comuns de injeção e manipulação de credenciais.
+
+<hr>
