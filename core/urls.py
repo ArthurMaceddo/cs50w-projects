@@ -35,4 +35,7 @@ urlpatterns = [
     path("goals/", views.goals_list, name="goals_list"),
     path("goals/new/", views.goal_create, name="goal_create"),
     path("goals/<int:pk>/delete/", views.goal_delete, name="goal_delete"),
+
+    # ── Dashboard API ─────────────────────────────
+    path("dashboard/activity/", views.dashboard_activity, name="dashboard_activity"),
 ]
