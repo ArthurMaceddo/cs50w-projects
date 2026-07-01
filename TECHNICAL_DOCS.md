@@ -261,4 +261,20 @@ https://codingnomads.com/what-is-path-converter - Patch Converter
 
 - **Segurança**: O uso de `UserCreationForm` (nativo do Django) é a prática recomendada, pois ele já cuida da validação de senhas, verificação de força e sanitização de dados, prevenindo vulnerabilidades comuns de injeção e manipulação de credenciais.
 
+https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
+
 <hr>
+
+# feat Implement CRUD views for Subject model
+
+- **`subjects_list(request)`**: Lista todas as matérias associadas ao usuário logado, garantindo isolamento de dados.
+- **`subject_create(request)`**: Processa a criação de uma nova matéria. Utiliza `.strip()` (serve para remover espaços em branco no início e no fim de uma string) e define um valor padrão para a cor caso não seja informada.
+- **`subject_detail(request, pk)`**: Recupera uma matéria específica do usuário (`get_object_or_404`) e exibe seus tópicos relacionados.
+- **`subject_edit(request, pk)`**: Realiza a edição das propriedades da matéria e persiste as alterações no banco de dados.
+- **`subject_delete(request, pk)`**: Gerencia a remoção da matéria através de uma requisição `POST`, garantindo que a exclusão seja intencional.
+
+### Observações Técnicas
+
+- **Segurança (Data Isolation)**: Todas as queries filtram pelo `user=request.user`. Isso é crucial para que um usuário não consiga acessar ou manipular matérias de outro usuário ao manipular o ID (`pk`) na URL.
+- **User Experience (UX)**: A utilização do `messages` fornece confirmação visual ao usuário após cada ação (criação, edição ou deleção), elevando a usabilidade da aplicação.
+- **`get_object_or_404`**: Esta função é um atalho profissional do Django que retorna automaticamente uma página de erro 404 caso o objeto não exista ou não pertença ao usuário, evitando erros de servidor (`DoesNotExist`).

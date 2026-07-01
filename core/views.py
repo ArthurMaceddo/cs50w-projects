@@ -1,9 +1,11 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.contrib.auth import login, logout
+
+from core.models import Subject
 # Create your views here.
 # Auth
 def dashboard(request):
@@ -27,21 +29,51 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
-# Subjects -----------------------------------------------------------------
+
+# ─────────────────────────────────────────
+# SUBJECTS
+# ─────────────────────────────────────────
+
 def subjects_list(request):
-    return HttpResponse("Subjects list placeholder")
+    subjects = Subject.objects.filter(user=request.user)
+    return render(request, "subjects/list.html", {"subjects": subjects})
 
 def subject_create(request):
-    return HttpResponse("Create subject placeholder")
+    if request.method == "POST":
+        name  = request.POST.get("name", "").strip()
+        desc  = request.POST.get("description", "").strip()
+        color = request.POST.get("color", "#5b88a5")
+        if name:
+            Subject.objects.create(user=request.user, name=name, description=desc, color=color)
+            messages.success(request, f'Subject "{name}" created!')
+            return redirect("subjects_list")
+    return render(request, "subjects/form.html", {"action": "Create"})
+
 
 def subject_detail(request, pk):
-    return HttpResponse(f"Detail of subject {pk} placeholder")
+    subject = get_object_or_404(Subject, pk=pk, user=request.user)
+    topics  = subject.topics.all()
+    return render(request, "subjects/detail.html", {"subject": subject, "topics": topics})
 
 def subject_edit(request, pk):
-    return HttpResponse(f"Edit subject {pk} placeholder")
+    subject = get_object_or_404(Subject, pk=pk, user=request.user)
+    if request.method == "POST":
+        subject.name        = request.POST.get("name", subject.name).strip()
+        subject.description = request.POST.get("description", "").strip()
+        subject.color       = request.POST.get("color", subject.color)
+        subject.save()
+        messages.success(request, "Subject updated!")
+        return redirect("subject_detail", pk=pk)
+    return render(request, "subjects/form.html", {"action": "Edit", "subject": subject})
+
 
 def subject_delete(request, pk):
-    return HttpResponse(f"Delete subject {pk} placeholder")
+    subject = get_object_or_404(Subject, pk=pk, user=request.user)
+    if request.method == "POST":
+        subject.delete()
+        messages.success(request, "Subject deleted.")
+        return redirect("subjects_list")
+    return render(request, "subjects/confirm_delete.html", {"subject": subject})
 
 # Topics -------------------------------------------------------------------
 def topic_create(request):
