@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import login, logout
 
-from core.models import PomodoroSession, Subject, Topic, WeeklyGoal
-# Create your views here.
+from core.models import Flashcard, PomodoroSession, Subject, Topic, WeeklyGoal
+
 # Auth
 def dashboard(request):
     return HttpResponse("Dashboard placeholder")
@@ -79,9 +79,85 @@ def subject_delete(request, pk):
         return redirect("subjects_list")
     return render(request, "subjects/confirm_delete.html", {"subject": subject})
 
-# Topics -------------------------------------------------------------------
 # ─────────────────────────────────────────
-# TÓPICOS
+# DASHBOARD
+# ─────────────────────────────────────────
+
+def dashboard(request):
+    today = date.today()
+    week_start = today - timedelta(days=today.weekday())  # monday
+
+    # Flashcards to review today
+    due_cards = Flashcard.objects.filter(
+        subject__user=request.user,
+        next_review_date__lte=today
+    ).count()
+
+    # Hours studied this week
+    week_sessions = PomodoroSession.objects.filter(
+        user=request.user,
+        started_at__date__gte=week_start,
+        completed=True
+    )
+    week_minutes = sum(s.duration_minutes for s in week_sessions)
+    week_hours = round(week_minutes / 60, 1)
+
+    # Weekly goals
+    goals = WeeklyGoal.objects.filter(user=request.user, week_start=week_start)
+
+    # Recent Sessions (last 5 completed)
+    recent_sessions = PomodoroSession.objects.filter(
+        user=request.user, completed=True
+    )[:5]
+
+    # Streak (straight days with at least one completed session)
+    streak = 0
+    check_date = today
+    while True:
+        has_session = PomodoroSession.objects.filter(
+            user=request.user,
+            started_at__date=check_date,
+            completed=True
+        ).exists()
+        if has_session:
+            streak += 1
+            check_date -= timedelta(days=1)
+        else:
+            break
+
+    context = {
+        "due_cards": due_cards,
+        "week_hours": week_hours,
+        "goals": goals,
+        "recent_sessions": recent_sessions,
+        "streak": streak,
+        "total_subjects": Subject.objects.filter(user=request.user).count(),
+        "total_flashcards": Flashcard.objects.filter(subject__user=request.user).count(),
+    }
+    return render(request, "dashboard.html", context)
+
+
+def dashboard_activity(request):
+    """API: returns JSON with session count by day (last 12 weeks)."""
+    since = date.today() - timedelta(weeks=12)
+    sessions = PomodoroSession.objects.filter(
+        user=request.user,
+        started_at__date__gte=since,
+        completed=True,
+    ).values("started_at__date")
+
+    counts = {}
+    for s in sessions:
+        d = str(s["started_at__date"])
+        counts[d] = counts.get(d, 0) + 1
+
+    return JsonResponse(counts)
+
+
+
+
+# ─────────────────────────────────────────
+# TOPICS
 # ─────────────────────────────────────────
 
 @require_POST
@@ -138,7 +214,7 @@ def pomodoro(request):
 
 @require_POST
 def pomodoro_save(request):
-    """API: salva uma sessão Pomodoro concluída."""
+    """API: saves a completed Pomodoro session."""
     data       = json.loads(request.body)
     subject    = get_object_or_404(Subject, pk=data.get("subject_id"), user=request.user)
     PomodoroSession.objects.create(
@@ -174,7 +250,7 @@ def goal_create(request):
             user=request.user, subject=subject, week_start=week_start,
             defaults={"target_hours": target_hours}
         )
-        messages.success(request, "Meta salva!")
+        messages.success(request, "Weekly goal saved!")
         return redirect("goals_list")
     return render(request, "goals/form.html", {"subjects": subjects})
 
