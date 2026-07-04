@@ -4,6 +4,7 @@ import json
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -11,9 +12,6 @@ from django.contrib.auth import login, logout
 
 from core.models import Flashcard, PomodoroSession, Subject, Topic, WeeklyGoal
 
-# Auth
-def dashboard(request):
-    return HttpResponse("Dashboard placeholder")
 
 # AUTH
 def register(request):
@@ -38,10 +36,12 @@ def logout_view(request):
 # SUBJECTS
 # ─────────────────────────────────────────
 
+@login_required
 def subjects_list(request):
     subjects = Subject.objects.filter(user=request.user)
     return render(request, "subjects/list.html", {"subjects": subjects})
 
+@login_required
 def subject_create(request):
     if request.method == "POST":
         name  = request.POST.get("name", "").strip()
@@ -53,12 +53,13 @@ def subject_create(request):
             return redirect("subjects_list")
     return render(request, "subjects/form.html", {"action": "Create"})
 
-
+@login_required
 def subject_detail(request, pk):
     subject = get_object_or_404(Subject, pk=pk, user=request.user)
     topics  = subject.topics.all()
     return render(request, "subjects/detail.html", {"subject": subject, "topics": topics})
 
+@login_required
 def subject_edit(request, pk):
     subject = get_object_or_404(Subject, pk=pk, user=request.user)
     if request.method == "POST":
@@ -70,7 +71,7 @@ def subject_edit(request, pk):
         return redirect("subject_detail", pk=pk)
     return render(request, "subjects/form.html", {"action": "Edit", "subject": subject})
 
-
+@login_required
 def subject_delete(request, pk):
     subject = get_object_or_404(Subject, pk=pk, user=request.user)
     if request.method == "POST":
@@ -83,6 +84,7 @@ def subject_delete(request, pk):
 # DASHBOARD
 # ─────────────────────────────────────────
 
+@login_required
 def dashboard(request):
     today = date.today()
     week_start = today - timedelta(days=today.weekday())  # monday
@@ -136,7 +138,7 @@ def dashboard(request):
     }
     return render(request, "dashboard.html", context)
 
-
+@login_required
 def dashboard_activity(request):
     """API: returns JSON with session count by day (last 12 weeks)."""
     since = date.today() - timedelta(weeks=12)
@@ -160,6 +162,7 @@ def dashboard_activity(request):
 # TOPICS
 # ─────────────────────────────────────────
 
+@login_required
 @require_POST
 def topic_create(request):
     subject_id = request.POST.get("subject_id")
@@ -170,7 +173,8 @@ def topic_create(request):
         Topic.objects.create(subject=subject, name=name, notes=notes)
     return redirect("subject_detail", pk=subject_id)
 
-
+@login_required
+@require_POST
 def topic_toggle(request, pk):
     """API: switch is_completed. Return JSON."""
     topic = get_object_or_404(Topic, pk=pk, subject__user=request.user)
@@ -181,6 +185,7 @@ def topic_toggle(request, pk):
         "progress": topic.subject.progress(),
     })
 
+@login_required
 def topic_delete(request, pk):
     topic = get_object_or_404(Topic, pk=pk, subject__user=request.user)
     subject_pk = topic.subject.pk
@@ -188,18 +193,24 @@ def topic_delete(request, pk):
     return JsonResponse({"deleted": True, "progress": Subject.objects.get(pk=subject_pk).progress()})
 
 # Flashcards -----------------------------------------------------------------
+@login_required
 def flashcard_list(request):
     return HttpResponse("Flashcards list placeholder")
 
+@login_required
 def flashcard_create(request):
     return HttpResponse("Create flashcard placeholder")
 
+@login_required
 def flashcard_review_session(request):
     return HttpResponse("Review session placeholder")
 
+@login_required
 def flashcard_delete(request, pk):
     return HttpResponse(f"Delete flashcard {pk} placeholder")
 
+@login_required
+@require_POST
 def flashcard_submit_review(request, pk):
     return HttpResponse(f"Submit review for flashcard {pk} placeholder")
 
@@ -207,11 +218,13 @@ def flashcard_submit_review(request, pk):
 # POMODORO
 # ─────────────────────────────────────────
 
+@login_required
 def pomodoro(request):
     subjects = Subject.objects.filter(user=request.user)
     recent   = PomodoroSession.objects.filter(user=request.user, completed=True)[:10]
     return render(request, "pomodoro/timer.html", {"subjects": subjects, "recent": recent})
 
+@login_required
 @require_POST
 def pomodoro_save(request):
     """API: saves a completed Pomodoro session."""
@@ -230,6 +243,7 @@ def pomodoro_save(request):
 # WEEKLY GOALS
 # ─────────────────────────────────────────
 
+@login_required
 def goals_list(request):
     today      = date.today()
     week_start = today - timedelta(days=today.weekday())
@@ -238,6 +252,7 @@ def goals_list(request):
 
 
 
+@login_required
 def goal_create(request):
     subjects = Subject.objects.filter(user=request.user)
     if request.method == "POST":
@@ -254,7 +269,7 @@ def goal_create(request):
         return redirect("goals_list")
     return render(request, "goals/form.html", {"subjects": subjects})
 
-
+@login_required
 def goal_delete(request, pk):
     goal = get_object_or_404(WeeklyGoal, pk=pk, user=request.user)
     goal.delete()
