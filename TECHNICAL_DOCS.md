@@ -360,3 +360,20 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Performance**: O uso de métodos como `count()` e a filtragem inteligente garantem que o dashboard carregue métricas pesadas de forma rápida, mesmo com o aumento do volume de dados do usuário.
 
 <hr>
+
+# fix(views): enforce authentication and HTTP method constraints
+
+* **Segurança de Acesso (`@login_required`)**:
+* Aplicado às views de gerenciamento (Subjects, Goals, Dashboard, etc.) para garantir que usuários não autenticados sejam redirecionados para a tela de login.
+
+
+* **Integridade de Ação (`@require_POST`)**:
+* Reforçado nos métodos que alteram estado no banco de dados (`create`, `edit`, `delete`, `save`), evitando que ações destrutivas ou de escrita sejam executadas via requisições `GET` acidentais (ex: busca de robôs ou erro de digitação de URL).
+
+
+---
+
+### Observação Técnica
+
+* **Proteção contra CSRF**: Ao combinar `@require_POST` com os formulários do Django (que utilizam a tag `{% csrf_token %}`), é criado uma camada de segurança robusta contra ataques de *Cross-Site Request Forgery*.
+
