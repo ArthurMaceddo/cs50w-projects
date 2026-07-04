@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 import json
 
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import login, logout
 
-from core.models import PomodoroSession, Subject, Topic
+from core.models import PomodoroSession, Subject, Topic, WeeklyGoal
 # Create your views here.
 # Auth
 def dashboard(request):
@@ -150,16 +150,36 @@ def pomodoro_save(request):
     )
     return JsonResponse({"saved": True})
 
-# Goals -----------------------------------------------------------------------
+# ─────────────────────────────────────────
+# WEEKLY GOALS
+# ─────────────────────────────────────────
+
 def goals_list(request):
-    return HttpResponse("Goals list placeholder")
+    today      = date.today()
+    week_start = today - timedelta(days=today.weekday())
+    goals      = WeeklyGoal.objects.filter(user=request.user, week_start=week_start)
+    return render(request, "goals/list.html", {"goals": goals, "week_start": week_start})
+
+
 
 def goal_create(request):
-    return HttpResponse("Create goal placeholder")
+    subjects = Subject.objects.filter(user=request.user)
+    if request.method == "POST":
+        subject_id   = request.POST.get("subject_id")
+        target_hours = float(request.POST.get("target_hours", 1))
+        subject      = get_object_or_404(Subject, pk=subject_id, user=request.user)
+        today        = date.today()
+        week_start   = today - timedelta(days=today.weekday())
+        WeeklyGoal.objects.update_or_create(
+            user=request.user, subject=subject, week_start=week_start,
+            defaults={"target_hours": target_hours}
+        )
+        messages.success(request, "Meta salva!")
+        return redirect("goals_list")
+    return render(request, "goals/form.html", {"subjects": subjects})
+
 
 def goal_delete(request, pk):
-    return HttpResponse(f"Delete goal {pk} placeholder")
-
-# Analytics
-def dashboard_activity(request):
-    return HttpResponse("Activity dashboard placeholder")
+    goal = get_object_or_404(WeeklyGoal, pk=pk, user=request.user)
+    goal.delete()
+    return redirect("goals_list")
