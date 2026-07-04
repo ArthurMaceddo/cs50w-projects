@@ -314,3 +314,25 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 - **`json.loads(request.body)`**: Como o Pomodoro é um timer que roda no cliente (JavaScript), o `pomodoro_save` espera um `POST` contendo dados estruturados em JSON em vez de um formulário padrão. Isso oferece maior flexibilidade para o seu front-end.
 - **Data/Hora**: A utilização de `datetime.now()` registra o momento exato da finalização (ou salvamento) no servidor. Dependendo do seu deploy, considere utilizar `django.utils.timezone.now()` para manter a consistência de fusos horários globalmente.
 - **Segurança**: Assim como nas outras rotas, a validação `user=request.user` garante que apenas sessões legítimas sejam criadas, protegendo seus dados de Analytics contra requisições maliciosas.
+
+<hr>
+
+# feat(views): Implement WeeklyGoal CRUD operations
+
+* **`goals_list(request)`**:
+* Calcula dinamicamente a data de início da semana (segunda-feira) utilizando `date.today()` e `weekday()`.
+* Exibe apenas as metas pertinentes à semana corrente, garantindo que o usuário visualize sempre o progresso atual.
+
+
+* **`goal_create(request)`**:
+* Utiliza `update_or_create` para gerenciar as metas. Isso é fundamental para evitar a duplicação de dados, permitindo que o usuário altere a meta de uma matéria na mesma semana sem criar registros conflitantes.
+* Assegura que a meta esteja vinculada estritamente às matérias do usuário logado.
+
+
+* **`goal_delete(request, pk)`**:
+* Permite a remoção de metas registradas, protegendo a operação com o filtro de propriedade do usuário.
+
+### Observações Técnicas
+
+* **Lógica de Calendário**: A subtração `today - timedelta(days=today.weekday())` é a maneira mais eficiente em Python puro para normalizar qualquer data para a segunda-feira daquela semana. Isso padroniza o seu banco de dados, facilitando queries futuras.
+* **Idempotência**: O uso de `update_or_create` torna a aplicação muito mais robusta. O usuário não precisa se preocupar se ele já criou a meta antes; o sistema apenas atualiza o valor da meta de horas caso ela já exista para aquela semana.
