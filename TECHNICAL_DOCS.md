@@ -336,3 +336,27 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Lógica de Calendário**: A subtração `today - timedelta(days=today.weekday())` é a maneira mais eficiente em Python puro para normalizar qualquer data para a segunda-feira daquela semana. Isso padroniza o seu banco de dados, facilitando queries futuras.
 * **Idempotência**: O uso de `update_or_create` torna a aplicação muito mais robusta. O usuário não precisa se preocupar se ele já criou a meta antes; o sistema apenas atualiza o valor da meta de horas caso ela já exista para aquela semana.
+
+<hr>
+
+# feat(views): Implement dashboard and activity analytics views
+
+* **`dashboard(request)`**:
+* Centraliza a inteligência do sistema: calcula o total de flashcards pendentes de revisão, horas de estudo na semana atual, progresso em metas semanais (`WeeklyGoal`) e o cálculo de *streak* (dias consecutivos de estudo).
+* Prepara o contexto completo para a home page do usuário com métricas de produtividade.
+
+
+* **`dashboard_activity(request)`**:
+* Endpoint de API focado em analytics: agrupa o número de sessões Pomodoro concluídas nos últimos 12 meses (agrupadas por dia).
+* Retorna um `JsonResponse` formatado para consumo por bibliotecas de gráficos (como Chart.js ou D3.js).
+
+
+---
+
+### Observações Técnicas
+
+* **Cálculo de Streak**: A implementação utiliza um loop `while` reverso (`check_date -= timedelta(days=1)`), que é uma forma eficiente de verificar a continuidade do estudo sem precisar processar todo o histórico do banco de dados de uma vez.
+* **Agregação de Dados**: No `dashboard_activity`, a utilização de `.values("started_at__date")` otimiza a consulta ao banco, extraindo apenas a informação necessária para o processamento do dicionário de contagens.
+* **Performance**: O uso de métodos como `count()` e a filtragem inteligente garantem que o dashboard carregue métricas pesadas de forma rápida, mesmo com o aumento do volume de dados do usuário.
+
+<hr>
