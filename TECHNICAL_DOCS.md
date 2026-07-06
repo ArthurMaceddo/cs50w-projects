@@ -377,3 +377,27 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Proteção contra CSRF**: Ao combinar `@require_POST` com os formulários do Django (que utilizam a tag `{% csrf_token %}`), é criado uma camada de segurança robusta contra ataques de *Cross-Site Request Forgery*.
 
+<hr>
+
+# feat(templates) - Implement base layout with navigation and global messaging
+
+* **Estrutura (`base.html`)**: Implementação do template mestre utilizando o sistema de herança do Django (`{% block content %}`).
+* **Componentes Globais**:
+* **Navegação (Navbar)**: Menu de navegação responsivo (Bootstrap 5) com links para todos os módulos (Dashboard, Matérias, Flashcards, Pomodoro, Metas) e botão de Logout, condicionado ao estado de autenticação (`user.is_authenticated`).
+* **Sistema de Mensagens**: Integração automática do `django.contrib.messages` exibindo alertas dinâmicos (sucesso, erro, aviso) que aparecem antes de cada `block content`, proporcionando feedback imediato ao usuário.
+
+
+* **Ativos**:
+* Integração com **Bootstrap 5** (CSS/JS) para o grid e componentes.
+* Integração com **Bootstrap Icons** para identidade visual dos módulos.
+* Configuração de link para arquivo CSS estático personalizado (`{% static 'css/styles.css' %}`).
+
+
+
+---
+
+### Observação Técnica
+
+* **Herança de Blocos**: A estrutura utiliza `{% block title %}`, `{% block content %}` e `{% block scripts %}`, permitindo que páginas filhas injetem conteúdo específico sem a necessidade de reescrever o layout da navbar ou scripts de carregamento global.
+* **UX/UI**: A utilização do formulário `POST` para o `logout` respeita a segurança do Django contra CSRF, garantindo que o encerramento da sessão não ocorra por erro ou indexação indevida.
+* **Bootstrap**: A escolha pelo Bootstrap 5 garante um layout profissional e *mobile-first* com esforço mínimo de CSS customizado, ideal para um MVP de Capstone.
