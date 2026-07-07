@@ -1,0 +1,96 @@
+{% extends "layout.html" %} {% block title %}Dashboard{% endblock %} {% block
+content %}
+
+<h2 class="mb-4">Hello, {{ user.username }}!</h2>
+
+<!-- Cards de resumo -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-primary">{{ total_subjects }}</div>
+        <small class="text-muted">Subjects</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-success">{{ total_flashcards }}</div>
+        <small class="text-muted">Flashcards</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-warning">{{ week_hours }}h</div>
+        <small class="text-muted">This week</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-danger">{{ streak }} 🔥</div>
+        <small class="text-muted">Consecutive days</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flashcards para hoje -->
+{% if due_cards > 0 %}
+<div class="alert alert-info d-flex justify-content-between align-items-center">
+  <span
+    ><i class="bi bi-card-text"></i> You have
+    <strong>{{ due_cards }}</strong> flashcard(s) to review today!</span
+  >
+  <a href="{% url 'flashcard_review' %}" class="btn btn-sm btn-primary"
+    >Review now</a
+  >
+</div>
+{% endif %}
+
+<!-- Metas da semana -->
+{% if goals %}
+<h5 class="mt-4 mb-3">Goals for this week</h5>
+{% for goal in goals %}
+<div class="mb-2">
+  <div class="d-flex justify-content-between">
+    <span style="color: {{ goal.subject.color }}"
+      >● {{ goal.subject.name }}</span
+    >
+    <small>{{ goal.current_hours }}h / {{ goal.target_hours }}h</small>
+  </div>
+  <div class="progress" style="height: 8px">
+    <div
+      class="progress-bar"
+      style="width: {{ goal.percentage }}%; background-color: {{ goal.subject.color }}"
+    ></div>
+  </div>
+</div>
+{% endfor %} {% endif %}
+
+<!-- Sessões recentes -->
+{% if recent_sessions %}
+<h5 class="mt-4 mb-3">⏱️ Recent Sessions</h5>
+<ul class="list-group list-group-flush">
+  {% for s in recent_sessions %}
+  <li class="list-group-item d-flex justify-content-between">
+    <span style="color: {{ s.subject.color }}">● {{ s.subject.name }}</span>
+    <span class="text-muted"
+      >{{ s.duration_minutes }}min — {{ s.started_at|date:"d/m H:i" }}</span
+    >
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<!-- Heatmap -->
+<h5 class="mt-4 mb-3">📅 Activity (12 weeks)</h5>
+<div id="heatmap" class="mb-4"></div>
+
+{% endblock %} {% block scripts %} {% load static %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

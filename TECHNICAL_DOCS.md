@@ -422,3 +422,12 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 ### Observação Técnica
 
 * **GitHub-style Contribution Grid**: Essa implementação replica o design visual dos gráficos de contribuição do GitHub no front-end utilizando divs com flexbox, consumindo diretamente o JSON gerado pela view `dashboard_activity` que criamos anteriormente.
+
+<hr>
+
+# feat(templates): implement user dashboard template with analytics and overview cards
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) sobrescrevendo os blocos de título (`title`), conteúdo (`content`) e scripts (`scripts`).
+* **Cards de Resumo**: Exibição em grid (Bootstrap 5) dos contadores principais (`total_subjects`, `total_flashcards`, `week_hours` e contagem de `streak`).
+* **Alertas e Metas**: Alerta condicional para flashcards pendentes de revisão (`due_cards`) e barras de progresso dinâmicas baseadas nas cores e horas cumpridas de cada `WeeklyGoal`.
+* **Histórico e Heatmap**: Listagem de sessões recentes de estudo e carregamento do container do heatmap de atividades através do script customizado `dashboard.js`.

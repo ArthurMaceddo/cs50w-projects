@@ -20,7 +20,7 @@ fetch("/dashboard/activity/")
       if (count === 2) color = "#40c463";
       if (count >= 3) color = "#216e39";
 
-      html += `<div title="${key}: ${count} sessão(ões)"
+      html += `<div title="${key}: ${count} session(s)"
                           style="width:12px;height:12px;border-radius:2px;background:${color}"></div>`;
     }
 
