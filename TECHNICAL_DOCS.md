@@ -440,3 +440,12 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`).
 * **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}`.
 * **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que já possuem cadastro na plataforma (`login`).
+
+<hr>
+
+# feat(templates): implement user login template with auth card layout
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Entrar".
+* **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`) mantendo a coerência visual com a página de cadastro.
+* **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}` do Django.
+* **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que ainda não possuem cadastro na plataforma (`register`).
