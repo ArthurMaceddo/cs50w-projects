@@ -15,10 +15,10 @@ fetch("/dashboard/activity/")
       const key = d.toISOString().split("T")[0];
       const count = data[key] || 0;
 
-      let color = "#ebedf0";
-      if (count === 1) color = "#9be9a8";
-      if (count === 2) color = "#40c463";
-      if (count >= 3) color = "#216e39";
+      let color = "#F4F4F2";
+      if (count === 1) color = "#5B88A5";
+      if (count === 2) color = "#406183"; // testing this color
+      if (count >= 3) color = "#243A69";
 
       html += `<div title="${key}: ${count} session(s)"
                           style="width:12px;height:12px;border-radius:2px;background:${color}"></div>`;
