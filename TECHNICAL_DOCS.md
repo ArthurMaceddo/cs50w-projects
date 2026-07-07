@@ -431,3 +431,12 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Cards de Resumo**: Exibição em grid (Bootstrap 5) dos contadores principais (`total_subjects`, `total_flashcards`, `week_hours` e contagem de `streak`).
 * **Alertas e Metas**: Alerta condicional para flashcards pendentes de revisão (`due_cards`) e barras de progresso dinâmicas baseadas nas cores e horas cumpridas de cada `WeeklyGoal`.
 * **Histórico e Heatmap**: Listagem de sessões recentes de estudo e carregamento do container do heatmap de atividades através do script customizado `dashboard.js`.
+
+<hr>
+
+# feat(templates): implement user registration template with auth card layout
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Cadastrar".
+* **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`).
+* **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}`.
+* **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que já possuem cadastro na plataforma (`login`).
