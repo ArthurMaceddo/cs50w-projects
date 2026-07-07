@@ -401,3 +401,24 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Herança de Blocos**: A estrutura utiliza `{% block title %}`, `{% block content %}` e `{% block scripts %}`, permitindo que páginas filhas injetem conteúdo específico sem a necessidade de reescrever o layout da navbar ou scripts de carregamento global.
 * **UX/UI**: A utilização do formulário `POST` para o `logout` respeita a segurança do Django contra CSRF, garantindo que o encerramento da sessão não ocorra por erro ou indexação indevida.
 * **Bootstrap**: A escolha pelo Bootstrap 5 garante um layout profissional e *mobile-first* com esforço mínimo de CSS customizado, ideal para um MVP de Capstone.
+
+<hr>
+
+# feat(frontend): implement activity heatmap rendering script
+
+* **Fetch API**: Realiza uma requisição assíncrona ao endpoint `/dashboard/activity/` para recuperar o dicionário de contagem de sessões dos últimos 12 semanas.
+* **Geração Dinâmica (`HTML Grid`)**: Itera retroativamente pelos últimos 84 dias (12 semanas $\times$ 7 dias), formatando a data no padrão ISO `YYYY-MM-DD` para corresponder às chaves retornadas pela API.
+* **Mapeamento de Cores (Intensidade)**:
+* `0 sessões`: `#ebedf0` (vazio/cinza claro)
+* `1 sessão`: `#9be9a8` (verde claro)
+* `2 sessões`: `#40c463` (verde médio)
+* `>= 3 sessões`: `#216e39` (verde escuro)
+
+
+* **Legenda e Tooltips**: Adiciona atributos `title` nativos para exibir o detalhamento de data e quantidade por quadradinho, acompanhado de uma legenda textual indicando a escala de atividade ("menos" a "mais").
+
+---
+
+### Observação Técnica
+
+* **GitHub-style Contribution Grid**: Essa implementação replica o design visual dos gráficos de contribuição do GitHub no front-end utilizando divs com flexbox, consumindo diretamente o JSON gerado pela view `dashboard_activity` que criamos anteriormente.
