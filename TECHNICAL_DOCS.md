@@ -449,3 +449,18 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`) mantendo a coerência visual com a página de cadastro.
 * **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}` do Django.
 * **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que ainda não possuem cadastro na plataforma (`register`).
+
+<hr>
+
+# fix(config): configure static files and authentication redirect paths
+
+* **Configuração de Arquivos Estáticos**: Adicionou `STATIC_URL` e `STATIC_ROOT` utilizando `BASE_DIR / 'staticfiles'`, preparando o projeto para coletar e servir arquivos estáticos de forma correta (essencial para ambientes de produção ou coleta com `collectstatic`).
+* **Rotas de Autenticação Globais**: Definidas as constantes `LOGIN_URL`, `LOGIN_REDIRECT_URL` e `LOGOUT_REDIRECT_URL` para direcionar o fluxo de sessões do usuário de forma automatizada pelo Django.
+* **Roteamento Raiz (`urls.py`)**: Inclusão de `path('', include('core.urls'))` no arquivo principal de URLs do projeto, conectando o roteador central diretamente às rotas da aplicação `core`.
+
+---
+
+### Observação Técnica
+
+* **`STATIC_ROOT`**: Especifica o diretório absoluto onde o comando `collectstatic` reunirá todos os arquivos estáticos da aplicação para servi-los eficientemente em produção.
+* **Fluxo de Redirecionamento**: Configurar `LOGIN_REDIRECT_URL = "/"` e `LOGOUT_REDIRECT_URL = "/login/"` garante que o `@login_required` e os componentes de login/logout saibam exatamente para onde encaminhar o usuário após autenticar ou encerrar a sessão.
