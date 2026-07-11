@@ -493,3 +493,17 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 
 * **Ações**: Botões de submissão para persistir dados e link de cancelamento com retorno direto para a listagem (`subjects_list`).
+
+<hr>
+
+# feat(templates): implement subject detail template with interactive topic list and progress sync`
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) usando o nome da matéria como título dinâmico (`{{ subject.name }}`).
+* **Cabeçalho de Progresso**: Exibição da cor identificadora da matéria, título e um badge com a barra de progresso sincronizada em tempo real (`{{ subject.progress }}`).
+* **Gerenciamento de Tópicos**:
+* Formulário integrado para a adição rápida de novos tópicos vinculados ao ID da matéria atual (`topic_create`).
+* Listagem interativa com caixas de seleção dinâmicas (`topic-toggle`) e botões de remoção (`topic-delete`).
+* Aplicação condicional de classes de texto riscado (`text-decoration-line-through`) para itens concluídos.
+
+
+* **Scripts e Configuração**: Injeção de variáveis globais via template tag script (`TOGGLE_URL`, `DELETE_URL`, `CSRF_TOKEN`) para consumo pelo script assíncrono `topics.js`.
