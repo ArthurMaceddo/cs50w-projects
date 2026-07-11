@@ -479,3 +479,17 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 
 * **Estado Vazio (`Empty State`)**: Exibição condicional de mensagem informativa com ícone centralizado caso o usuário não possua nenhuma matéria cadastrada.
+
+<hr>
+
+# feat(templates): implement subject form template for create and edit actions
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) com título dinâmico baseado na variável de ação (`{{ action }} Matéria`).
+* **Estrutura de Formulário**: Layout centralizado em largura otimizada (`col-12 col-md-6`) para melhor usabilidade em telas médias e grandes.
+* **Campos e Validação**:
+* Campo `name` obrigatório, injetando o valor atual caso esteja em modo de edição (`{{ subject.name|default:'' }}`).
+* Campo `description` em textarea opcional.
+* Seletor de cor customizado (`input type="color"`) utilizando o padrão do Bootstrap (`form-control-color`) e valor padrão de fallback (`#4A90D9`).
+
+
+* **Ações**: Botões de submissão para persistir dados e link de cancelamento com retorno direto para a listagem (`subjects_list`).
