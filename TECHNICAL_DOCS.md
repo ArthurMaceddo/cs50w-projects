@@ -464,3 +464,18 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **`STATIC_ROOT`**: Especifica o diretório absoluto onde o comando `collectstatic` reunirá todos os arquivos estáticos da aplicação para servi-los eficientemente em produção.
 * **Fluxo de Redirecionamento**: Configurar `LOGIN_REDIRECT_URL = "/"` e `LOGOUT_REDIRECT_URL = "/login/"` garante que o `@login_required` e os componentes de login/logout saibam exatamente para onde encaminhar o usuário após autenticar ou encerrar a sessão.
+
+<hr>
+
+# feat(templates): implement subjects list template with card grid and progress indicators
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Subjects".
+* **Cabeçalho de Ação**: Título com ícone e botão de atalho para a criação de uma nova matéria (`subject_create`).
+* **Grid de Matérias (`Responsive Cards`)**: Itera sobre a lista de matérias usando um sistema de colunas adaptativo (`col-12 col-md-6 col-lg-4`). Cada card exibe:
+* Indicador visual de cor dinâmico (`subject.color`).
+* Descrição opcional truncada.
+* Barra de progresso percentual calculada via método do modelo (`subject.progress`).
+* Ações rápidas de navegação (`subject_detail`), edição (`subject_edit`) e exclusão (`subject_delete`).
+
+
+* **Estado Vazio (`Empty State`)**: Exibição condicional de mensagem informativa com ícone centralizado caso o usuário não possua nenhuma matéria cadastrada.
