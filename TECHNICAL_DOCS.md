@@ -523,3 +523,18 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Card de Alerta**: Container com borda destacada em vermelho (`border-danger`) e ícone de aviso (`bi-exclamation-triangle-fill`) para alertar o usuário sobre o risco de perda permanente de dados.
 * **Mensagem de Confirmação**: Exibe o nome da matéria alvo (`{{ subject.name }}`) e avisa sobre a exclusão em cascata de elementos vinculados (tópicos, flashcards e sessões).
 * **Ações**: Formulário protegido com token `{% csrf_token %}` contendo botão de confirmação destrutiva (`btn-danger`) e link de cancelamento com retorno à listagem (`subjects_list`).
+
+<hr>
+
+# feat(templates): implement Pomodoro timer interface with subject selector and recent session history
+
+* **Extensão de Layout**: Herança do template base (`{% extends "layout.html" %}`) definindo o título "Pomodoro".
+* **Seleção de Matéria**: Dropdown centralizado (`subject-select`) para associar a sessão de estudo a uma matéria cadastrada pelo usuário.
+* **Display e Controles do Timer**:
+* Visor de tempo configurado para o padrão de 25 minutos (`timer-display`).
+* Indicador de estado atual (`timer-label`) e botões de ação (`Start`, `Pause`, `Reset`) com estados dinâmicos e responsivos.
+* Contador de ciclos e barra de progresso em tempo real integrada.
+
+
+* **Histórico Recente**: Listagem condicional das últimas sessões finalizadas (`recent`) contendo duração e data/hora formatada.
+* **Configuração de Scripts**: Injeção da URL de salvamento (`SAVE_URL`) e do token CSRF global para consumo pelo script front-end `pomodoro.js`.
