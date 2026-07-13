@@ -565,3 +565,22 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Lógica de Fim de Ciclo (`onTimerEnd`)**: Alternância automática entre ciclos de foco e pausa (curta ou longa a cada 4 ciclos), atualizando os elementos da interface e enviando alertas sonoros/visuais.
 * **Controles do Timer**: Implementação dos ouvintes de eventos para `Start` (com validação de matéria obrigatória), `Pause` e `Reset`.
+
+<hr>
+
+# feat(styles): implement global stylesheet with reset, layout components, and Pomodoro timer styling
+
+* **Reset e Base**: Normalização de margens, paddings, dimensionamento de caixa (`border-box`) e definição da tipografia padrão com esquema de cores limpo para o fundo e textos.
+* **Componentes de Layout**:
+* Estilização da barra de navegação (`navbar`) responsiva com efeitos de hover nos links.
+* Definição do container centralizado principal com largura máxima e espaçamentos fluidos.
+
+
+* **Formulários e Alertas**:
+* Padronização visual para inputs, textareas, selects e botões de ação com estados de foco.
+* Configuração de alertas globais, incluindo variações específicas para mensagens do Django/Bootstrap (`alert-success`, `alert-error`).
+
+
+* **Timer Pomodoro e Responsividade**:
+* Estilização dedicada ao display do timer com fontes grandes (`.timer-display`) e uso de `font-variant-numeric: tabular-nums` para evitar o redimensionamento visual indesejado dos dígitos durante a contagem regressiva.
+* Media queries otimizadas para adaptação em dispositivos móveis (`max-width: 600px` e `400px`).
