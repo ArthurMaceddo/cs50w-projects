@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block title %}Pomodoro{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6 text-center">
+
+        <h2 class="mb-4">⏱️ Timer Pomodoro</h2>
+
+        <!-- Subject Selector -->
+        <div class="mb-4">
+            <select id="subject-select" class="form-select form-select-lg text-center">
+                <option value="">Select the subject...</option>
+                {% for s in subjects %}
+                <option value="{{ s.pk }}">{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-display mb-3" id="timer-display">25:00</div>
+
+        <!-- Label of current stte -->
+        <p class="text-muted mb-4" id="timer-label">Focus 🎯</p>
+
+        <!-- Controls -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button class="btn btn-success btn-lg px-4" id="btn-start">
+                <i class="bi bi-play-fill"></i> Start
+            </button>
+            <button class="btn btn-warning btn-lg px-4" id="btn-pause" disabled>
+                <i class="bi bi-pause-fill"></i> Pause
+            </button>
+            <button class="btn btn-outline-secondary btn-lg px-4" id="btn-reset">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </button>
+        </div>
+
+        <!-- Cycle counter -->
+        <div class="mb-4">
+            <span class="badge bg-primary fs-6" id="cycle-badge">Cicle 1 / 4</span>
+        </div>
+
+        <!-- Timer Progress bar -->
+        <div class="progress mb-4" style="height: 6px;">
+            <div class="progress-bar bg-success" id="timer-progress" style="width: 0%"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- History of sessions -->
+{% if recent %}
+<hr class="my-4">
+<h5 class="mb-3">📋 Recent Sessions</h5>
+<ul class="list-group list-group-flush">
+    {% for s in recent %}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>
+            
+            {{ s.subject.name }}
+        </span>
+        <span class="text-muted">
+            {{ s.duration_minutes }}min — {{ s.started_at|date:"d/m H:i" }}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script>
+const SAVE_URL   = "{% url 'pomodoro_save' %}";
+const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script src="{% static '/js/pomodoro.js' %}"></script>
+{% endblock %}
