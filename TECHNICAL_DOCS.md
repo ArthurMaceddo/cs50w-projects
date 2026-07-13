@@ -538,3 +538,16 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Histórico Recente**: Listagem condicional das últimas sessões finalizadas (`recent`) contendo duração e data/hora formatada.
 * **Configuração de Scripts**: Injeção da URL de salvamento (`SAVE_URL`) e do token CSRF global para consumo pelo script front-end `pomodoro.js`.
+
+<hr>
+
+# feat(templates): implement weekly goals list and creation form templates
+
+* **Listagem de Metas (`goals_list.html`)**:
+* **Extensão de Layout**: Herança do template base com título "Weekly Goals" e exibição formatada da data de início da semana (`week_start`).
+* **Cards de Progresso**: Grid responsivo exibindo cada meta vinculada à sua respectiva matéria, incluindo indicador de cor, contagem de horas atuais versus o alvo (`current_hours / target_hours`) e barra de progresso percentual.
+* **Ações**: Botões de exclusão individuais via formulário protegido por token CSRF e confirmação nativa.
+
+
+* **Formulário de Nova Meta (`goal_create.html`)**:
+* **Estrutura de Criação**: Layout centralizado com campos para seleção de matéria (`subject_id`) e definição de horas alvo (`target_hours`) com restrições numéricas otimizadas (`min="0.5" max="40" step="0.5"`).
