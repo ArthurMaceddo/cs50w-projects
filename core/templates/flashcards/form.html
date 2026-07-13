@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block title %}New Flashcard{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6">
+
+        <h2 class="mb-4">New Flashcard</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Subject</label>
+                <select name="subject_id" class="form-select" required>
+                    <option value="">Select...</option>
+                    {% for s in subjects %}
+                    <option value="{{ s.pk }}">{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-front"></i> Front (question)
+                </label>
+                <textarea name="front" class="form-control" rows="3"
+                          placeholder="What do you want to ask?" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-back"></i> Back (answer)
+                </label>
+                <textarea name="back" class="form-control" rows="3"
+                          placeholder="What is the answer?" required></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Create Flashcard
+                </button>
+                <a href="{% url 'flashcard_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

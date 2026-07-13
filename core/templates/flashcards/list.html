@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% block title %}Flashcards{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>🃏 Flashcards</h2>
+    <div class="d-flex gap-2">
+        {% if due_count > 0 %}
+        <a href="{% url 'flashcard_review' %}" class="btn btn-success">
+            <i class="bi bi-play-fill"></i> Review today ({{ due_count }})
+        </a>
+        {% endif %}
+        <a href="{% url 'flashcard_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Card
+        </a>
+    </div>
+</div>
+
+<!-- Filter by subject  -->
+<form method="GET" class="mb-4">
+    <div class="input-group" style="max-width: 300px;">
+        <select name="subject" class="form-select" onchange="this.form.submit()">
+            <option value="">All Subjects</option>
+            {% for s in subjects %}
+            <option value="{{ s.pk }}" {% if selected_subject == s.pk|stringformat:"s" %}selected{% endif %}>
+                {{ s.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+{% if flashcards %}
+<div class="row g-3">
+    {% for card in flashcards %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <span class="badge mb-2" style="background: {{ card.subject.color }}">{{ card.subject.name }}</span>
+                <p class="fw-semibold mb-1">{{ card.front }}</p>
+                <p class="text-muted small">{{ card.back }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="bi bi-calendar"></i>
+                    Review: {{ card.next_review_date|date:"d/m/Y" }}
+                    {% if card.is_due_today %}<span class="badge bg-warning text-dark ms-1">Today!</span>{% endif %}
+                </small>
+                <button class="btn btn-sm btn-outline-danger delete-card" data-card-id="{{ card.pk }}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted mt-5">
+    <i class="bi bi-card-text fs-1"></i>
+    <p class="mt-2">No flashcards found.</p>
+    <a href="{% url 'flashcard_create' %}" class="btn btn-primary">Create first flashcard</a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script>
+const DELETE_CARD_URL = "{% url 'flashcard_delete' 0 %}".replace("/0/", "/{id}/");
+const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script>
+document.querySelectorAll(".delete-card").forEach(btn => {
+    btn.addEventListener("click", function () {
+        if (!confirm("Delete this flashcard?")) return;
+        const id  = this.dataset.cardId;
+        const url = DELETE_CARD_URL.replace("{id}", id);
+        fetch(url, { method: "DELETE", headers: { "X-CSRFToken": CSRF_TOKEN } })
+            .then(res => res.json())
+            .then(() => this.closest(".col-12").remove());
+    });
+});
+</script>
+{% endblock %}

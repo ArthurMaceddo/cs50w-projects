@@ -584,3 +584,22 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Timer Pomodoro e Responsividade**:
 * Estilização dedicada ao display do timer com fontes grandes (`.timer-display`) e uso de `font-variant-numeric: tabular-nums` para evitar o redimensionamento visual indesejado dos dígitos durante a contagem regressiva.
 * Media queries otimizadas para adaptação em dispositivos móveis (`max-width: 600px` e `400px`).
+
+<hr>
+
+# feat(templates): implement flashcard review, list, and creation templates
+
+* **Revisão de Flashcards (`flashcard_review.html`)**:
+* **Extensão de Layout**: Herança do template base com título "Review of Flashcards".
+* **Área do Card 3D**: Interface rotativa (`flashcard-scene` e `flashcard-card`) para alternar entre a frente (pergunta) e o verso (resposta).
+* **Botões de Avaliação**: Opções de feedback dinâmicas (`Wrong`, `Hard`, `Easy`) para o algoritmo de repetição espaçada e barra de progresso em tempo real.
+* **Tela de Conclusão**: Bloco condicional oculto que exibe parabéns e atalho de retorno ao dashboard após o término da revisão diária.
+
+
+* **Listagem de Flashcards (`flashcard_list.html`)**:
+* **Filtros e Ações**: Cabeçalho com gatilho condicional para revisão imediata, botão de criação e filtro de matérias via método `GET`.
+* **Grid de Cards**: Listagem responsiva com badge de identificação de matéria, datas da próxima revisão e botões de exclusão assíncrona.
+
+
+* **Criação de Flashcard (`flashcard_create.html`)**:
+* **Formulário de Entrada**: Campos em textarea para os lados frontal e traseiro (`front` e `back`), validados e protegidos por token CSRF.

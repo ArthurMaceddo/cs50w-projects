@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block title %}Review of Flashcards{% endblock %}
+
+{% block content %}
+
+<div class="text-center mb-4">
+    <h2>🃏 Review of Today</h2>
+    <p class="text-muted" id="counter-text">Loading...</p>
+</div>
+
+<!-- Card Area (flip CSS 3D) -->
+<div class="d-flex justify-content-center mb-4">
+    <div class="flashcard-scene" id="card-scene">
+        <div class="flashcard-card" id="flip-card">
+
+            <!-- Front -->
+            <div class="flashcard-face flashcard-front d-flex flex-column justify-content-center align-items-center p-4">
+                <span class="badge bg-secondary mb-3" id="card-subject">—</span>
+                <p class="fs-5 fw-semibold text-center mb-4" id="card-front">—</p>
+                <button class="btn btn-outline-primary" id="btn-flip">
+                    <i class="bi bi-arrow-repeat"></i> See answer
+                </button>
+            </div>
+
+            <!-- Back -->
+            <div class="flashcard-face flashcard-back d-flex flex-column justify-content-center align-items-center p-4">
+                <p class="text-muted small mb-2">Answer:</p>
+                <p class="fs-5 text-center mb-4" id="card-back">—</p>
+
+                <!-- Review Buttons -->
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <button class="btn btn-danger rating-btn" data-rating="wrong">
+                        ❌ Wrong
+                    </button>
+                    <button class="btn btn-warning rating-btn" data-rating="hard">
+                        😐 Hard
+                    </button>
+                    <button class="btn btn-success rating-btn" data-rating="easy">
+                        ✅ Easy
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Session Progress -->
+<div class="d-flex justify-content-center mb-4">
+    <div style="width: 300px;">
+        <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" id="session-progress" style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Conclusion Screen (hiddent initially) -->
+<div id="done-screen" class="text-center d-none">
+    <i class="bi bi-trophy-fill text-warning fs-1"></i>
+    <h3 class="mt-3">Review completed! 🎉</h3>
+    <p class="text-muted">You reviewed all the flashcards for today.</p>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary mt-2">Back to dashboard</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script>
+// Data of the cards from Django (JSON seguro)
+const CARDS = {{ cards_json|safe }};
+const SUBMIT_URL = "{% url 'flashcard_submit' 0 %}".replace("/0/", "/{id}/");
+const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script src="{% static 'js/flashcard.js' %}"></script>
+{% endblock %}
