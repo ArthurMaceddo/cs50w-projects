@@ -507,3 +507,10 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 
 * **Scripts e Configuração**: Injeção de variáveis globais via template tag script (`TOGGLE_URL`, `DELETE_URL`, `CSRF_TOKEN`) para consumo pelo script assíncrono `topics.js`.
+
+<hr>
+
+# feat(frontend): implement asynchronous topic toggle and deletion logic with progress updates`
+
+* **Toggle de Conclusão**: Intercepta o evento `change` dos checkboxes de tópicos, disparando uma requisição assíncrona (`POST`) via Fetch API com o token CSRF adequado. Atualiza visualmente o texto do tópico (riscado/cinza) e recalcula as barras e badges de progresso da página em tempo real.
+* **Exclusão de Tópicos**: Intercepta o clique nos botões de lixeira com confirmação nativa (`confirm`), disparando uma requisição `DELETE` assíncrona para o endpoint correspondente e removendo o elemento do DOM em caso de sucesso.
