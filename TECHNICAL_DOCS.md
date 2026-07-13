@@ -514,3 +514,12 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Toggle de Conclusão**: Intercepta o evento `change` dos checkboxes de tópicos, disparando uma requisição assíncrona (`POST`) via Fetch API com o token CSRF adequado. Atualiza visualmente o texto do tópico (riscado/cinza) e recalcula as barras e badges de progresso da página em tempo real.
 * **Exclusão de Tópicos**: Intercepta o clique nos botões de lixeira com confirmação nativa (`confirm`), disparando uma requisição `DELETE` assíncrona para o endpoint correspondente e removendo o elemento do DOM em caso de sucesso.
+
+<hr>
+
+# feat(templates): implement subject deletion confirmation template 
+
+* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Excluir Matéria".
+* **Card de Alerta**: Container com borda destacada em vermelho (`border-danger`) e ícone de aviso (`bi-exclamation-triangle-fill`) para alertar o usuário sobre o risco de perda permanente de dados.
+* **Mensagem de Confirmação**: Exibe o nome da matéria alvo (`{{ subject.name }}`) e avisa sobre a exclusão em cascata de elementos vinculados (tópicos, flashcards e sessões).
+* **Ações**: Formulário protegido com token `{% csrf_token %}` contendo botão de confirmação destrutiva (`btn-danger`) e link de cancelamento com retorno à listagem (`subjects_list`).
