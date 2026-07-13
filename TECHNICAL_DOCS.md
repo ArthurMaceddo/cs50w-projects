@@ -603,3 +603,13 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Criação de Flashcard (`flashcard_create.html`)**:
 * **Formulário de Entrada**: Campos em textarea para os lados frontal e traseiro (`front` e `back`), validados e protegidos por token CSRF.
+
+<hr>
+
+# feat(styles): implement complete stylesheet with 3D flashcard flip, card hover effects, and UI components
+
+* **Auth Card**: Adicionado e estruturado o componente de autenticação centralizado (`.auth-card`) com espaçamento, bordas arredondadas e sombra suave.
+* **Flashcard Flip 3D**: Implementação completa da cena e animação de rotação 3D (`perspective`, `transform-style: preserve-3d`, `backface-visibility: hidden`), com estados para a frente (`.flashcard-front`) e verso (`.flashcard-back`), incluindo ajustes responsivos.
+* **Componentes e Interações**:
+* Efeitos de transição e elevação (`translateY`) em hover para os cards da aplicação (`.card:hover`).
+* Refinamento visual para badges (`.badge`) e consistência das classes de alerta.
