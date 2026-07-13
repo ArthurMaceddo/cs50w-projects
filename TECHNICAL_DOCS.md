@@ -551,3 +551,17 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 * **Formulário de Nova Meta (`goal_create.html`)**:
 * **Estrutura de Criação**: Layout centralizado com campos para seleção de matéria (`subject_id`) e definição de horas alvo (`target_hours`) com restrições numéricas otimizadas (`min="0.5" max="40" step="0.5"`).
+
+<hr>
+
+# feat(frontend): implement Pomodoro timer state machine and notification logic
+
+* **Configuração e Estado**: Definição de constantes de tempo (25min de foco, pausas curtas/longas) e gerenciamento de estado global (`remainingSeconds`, `isFocus`, `cycleCount`).
+* **Funções Utilitárias**:
+* Formatação de tempo em `MM:SS` e atualização dinâmica da barra de progresso.
+* Solicitação e disparo de notificações nativas do navegador (`Notification API`).
+* Comunicação assíncrona com o back-end via `fetch` para persistir as sessões de estudo concluídas (`saveSession`).
+
+
+* **Lógica de Fim de Ciclo (`onTimerEnd`)**: Alternância automática entre ciclos de foco e pausa (curta ou longa a cada 4 ciclos), atualizando os elementos da interface e enviando alertas sonoros/visuais.
+* **Controles do Timer**: Implementação dos ouvintes de eventos para `Start` (com validação de matéria obrigatória), `Pause` e `Reset`.
