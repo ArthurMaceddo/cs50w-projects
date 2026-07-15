@@ -613,3 +613,20 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 * **Componentes e Interações**:
 * Efeitos de transição e elevação (`translateY`) em hover para os cards da aplicação (`.card:hover`).
 * Refinamento visual para badges (`.badge`) e consistência das classes de alerta.
+
+<hr>
+
+# feat(frontend): implement flashcard review logic with 3D flip controls, spaced repetition ratings, and progress tracking
+
+* **Gerenciamento de Estado**: Controle do índice atual (`currentIndex`) e total de cards (`CARDS`), calculando o progresso da sessão e atualizando o contador dinamicamente.
+* **Ciclo de Vida do Card (`loadCard`)**:
+* Tratamento de conclusão da sessão com ocultação da cena 3D e exibição da tela de parabéns (`done-screen`).
+* Redefinição do estado de rotação antes de injetar os dados (`subject`, `front`, `back`) com atraso sincronizado para suavizar a transição visual.
+
+
+* **Controles de Interação**:
+* Evento de clique para o botão "See Answer" e suporte a clique direto no card ignorando elementos internos de botões.
+* Envio assíncrono via `fetch` dos níveis de avaliação (`rating-btn`) protegidos por token CSRF e travamento temporário de botões para evitar duplo envio durante o processamento.
+
+
+* **Inicialização Condicional**: Verificação prévia se há flashcards disponíveis no dia, ajustando o layout inicial em caso de lista vazia.
