@@ -630,3 +630,13 @@ https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
 
 
 * **Inicialização Condicional**: Verificação prévia se há flashcards disponíveis no dia, ajustando o layout inicial em caso de lista vazia.
+
+<hr>
+
+# feat(views): implement flashcard list, creation, review session, and SRS submission endpoints
+
+* **Listagem e Filtros (`flashcard_list`)**: Restringe o escopo de matérias e flashcards ao usuário autenticado (`request.user`), aplicando filtro opcional por ID de matéria via query parameters e calculando a contagem de revisões devidas para o dia.
+* **Criação de Flashcard (`flashcard_create`)**: Processa o envio via método POST de dados sanitizados (`front`, `back`), validando a propriedade da matéria vinculada antes de registrar o novo card no banco de dados.
+* **Sessão de Revisão (`flashcard_review_session`)**: Filtra os cartões pendentes de revisão com data limite menor ou igual ao dia atual, serializando os atributos principais e exportando-os em formato JSON seguro (`cards_json`).
+* **Submissão de SRS (`flashcard_submit_review`)**: Endpoint de API protegido por `@require_POST` que recebe o nível de avaliação enviado pelo front-end, registra o histórico no modelo `FlashcardReview` e aplica o algoritmo de repetição espaçada no card.
+* **Exclusão de Flashcard (`flashcard_delete`)**: Remove o registro correspondente após validar o vínculo com o usuário logado, retornando uma resposta JSON de confirmação.
