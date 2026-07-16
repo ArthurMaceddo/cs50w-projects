@@ -50,7 +50,7 @@
 
 <!-- Goals for the week -->
 {% if goals %}
-<h5 class="mt-4 mb-3">🎯 Goals for this week</h5>
+<h5 class="mt-4 mb-3">Goals for this week</h5>
 {% for goal in goals %}
 <div class="mb-2">
     <div class="d-flex justify-content-between">
@@ -66,7 +66,7 @@
 
 <!-- Recent Sessions -->
 {% if recent_sessions %}
-<h5 class="mt-4 mb-3">⏱️ Recent Sessions</h5>
+<h5 class="mt-4 mb-3">Recent Sessions</h5>
 <ul class="list-group list-group-flush">
     {% for s in recent_sessions %}
     <li class="list-group-item d-flex justify-content-between">
@@ -78,7 +78,7 @@
 {% endif %}
 
 <!-- Heatmap -->
-<h5 class="mt-4 mb-3">📅 Activity (12 weeks)</h5>
+<h5 class="mt-4 mb-3">Activity (12 weeks)</h5>
 <div id="heatmap" class="mb-4"></div>
 
 {% endblock %}
