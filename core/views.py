@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import login, logout
 
-from core.models import Flashcard, PomodoroSession, Subject, Topic, WeeklyGoal
+from core.models import Flashcard, FlashcardReview, PomodoroSession, Subject, Topic, WeeklyGoal
 
 
 # AUTH
@@ -195,24 +195,68 @@ def topic_delete(request, pk):
 # Flashcards -----------------------------------------------------------------
 @login_required
 def flashcard_list(request):
-    return HttpResponse("Flashcards list placeholder")
+    subject_id = request.GET.get("subject")
+    subjects   = Subject.objects.filter(user=request.user)
+    flashcards = Flashcard.objects.filter(subject__user=request.user)
+    if subject_id:
+        flashcards = flashcards.filter(subject_id=subject_id)
+    due_count = Flashcard.objects.filter(
+        subject__user=request.user, next_review_date__lte=date.today()
+    ).count()
+    return render(request, "flashcards/list.html", {
+        "flashcards": flashcards,
+        "subjects": subjects,
+        "selected_subject": subject_id,
+        "due_count": due_count,
+    })
+
 
 @login_required
 def flashcard_create(request):
-    return HttpResponse("Create flashcard placeholder")
+    subjects = Subject.objects.filter(user=request.user)
+    if request.method == "POST":
+        front      = request.POST.get("front", "").strip()
+        back       = request.POST.get("back", "").strip()
+        subject_id = request.POST.get("subject_id")
+        subject    = get_object_or_404(Subject, pk=subject_id, user=request.user)
+        if front and back:
+            Flashcard.objects.create(subject=subject, front=front, back=back)
+            messages.success(request, "Flashcard criado!")
+            return redirect("flashcard_list")
+    return render(request, "flashcards/form.html", {"subjects": subjects})
+
 
 @login_required
 def flashcard_review_session(request):
-    return HttpResponse("Review session placeholder")
+    """Retorna os flashcards devidos hoje como JSON para o JavaScript consumir."""
+    cards = Flashcard.objects.filter(
+        subject__user=request.user,
+        next_review_date__lte=date.today()
+    )
+    data = [{"id": c.pk, "front": c.front, "back": c.back, "subject": c.subject.name} for c in cards]
+    return render(request, "flashcards/review.html", {"cards_json": json.dumps(data), "count": len(data)})
 
-@login_required
-def flashcard_delete(request, pk):
-    return HttpResponse(f"Delete flashcard {pk} placeholder")
 
 @login_required
 @require_POST
 def flashcard_submit_review(request, pk):
-    return HttpResponse(f"Submit review for flashcard {pk} placeholder")
+    """API: salva a avaliação e atualiza next_review_date via SRS."""
+    card   = get_object_or_404(Flashcard, pk=pk, subject__user=request.user)
+    data   = json.loads(request.body)
+    rating = data.get("rating", "wrong")
+
+    FlashcardReview.objects.create(flashcard=card, rating=rating)
+    card.apply_review(rating)
+
+    return JsonResponse({"next_review_date": str(card.next_review_date), "interval_days": card.interval_days})
+
+
+@login_required
+def flashcard_delete(request, pk):
+    card = get_object_or_404(Flashcard, pk=pk, subject__user=request.user)
+    card.delete()
+    return JsonResponse({"deleted": True})
+
 
 # ─────────────────────────────────────────
 # POMODORO
