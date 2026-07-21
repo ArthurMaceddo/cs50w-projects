@@ -94,9 +94,9 @@ class Flashcard(models.Model):
 
 class FlashcardReview(models.Model):
     RATING_CHOICES = [
-        ("easy",  "Fácil"),
-        ("hard",  "Difícil"),
-        ("wrong", "Errei"),
+        ("easy",  "Easy"),
+        ("hard",  "Hard"),
+        ("wrong", "Wrong"),
     ]
     flashcard   = models.ForeignKey(Flashcard, on_delete=models.CASCADE, related_name="reviews")
     rating      = models.CharField(max_length=10, choices=RATING_CHOICES)
@@ -111,8 +111,8 @@ class FlashcardReview(models.Model):
 class WeeklyGoal(models.Model):
     user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name="weekly_goals")
     subject      = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="goals")
-    target_hours = models.FloatField()      # ex: 5.0 = 5 horas na semana
-    week_start   = models.DateField()       # sempre a segunda da semana
+    target_hours = models.FloatField()      # ex: 5.0 = 5 hours in the week
+    week_start   = models.DateField()       # always Monday of the week
 
     def __str__(self):
         return f"{self.subject.name} — {self.target_hours}h — week of {self.week_start}"
@@ -137,4 +137,4 @@ class WeeklyGoal(models.Model):
 
     class Meta:
         ordering = ["week_start", "subject"]
-        unique_together = ["user", "subject", "week_start"]  
+        unique_together = ["user", "subject", "week_start"]

@@ -35,9 +35,9 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">{{ goal.percentage }}% concluído</small>
+                    <small class="text-muted">{{ goal.percentage }}% completed</small>
                     <form method="POST" action="{% url 'goal_delete' goal.pk %}"
-                          onsubmit="return confirm('Excluir esta meta?')">
+                          onsubmit="return confirm('Delete this goal?')">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-trash"></i>

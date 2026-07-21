@@ -17,7 +17,7 @@ fetch("/dashboard/activity/")
 
       let color = "#F4F4F2";
       if (count === 1) color = "#5B88A5";
-      if (count === 2) color = "#406183"; // testing this color
+      if (count === 2) color = "#406183";
       if (count >= 3) color = "#243A69";
 
       html += `<div title="${key}: ${count} session(s)"
@@ -26,12 +26,12 @@ fetch("/dashboard/activity/")
 
     html += "</div>";
     html +=
-      '<div class="mt-1"><small class="text-muted">menos</small>' +
-      ' <span style="display:inline-block;width:10px;height:10px;background:#ebedf0;border-radius:2px"></span>' +
-      ' <span style="display:inline-block;width:10px;height:10px;background:#9be9a8;border-radius:2px"></span>' +
-      ' <span style="display:inline-block;width:10px;height:10px;background:#40c463;border-radius:2px"></span>' +
-      ' <span style="display:inline-block;width:10px;height:10px;background:#216e39;border-radius:2px"></span>' +
-      ' <small class="text-muted">mais</small></div>';
+      '<div class="mt-1"><small class="text-muted">less</small>' +
+      ' <span style="display:inline-block;width:10px;height:10px;background:#F4F4F2;border-radius:2px"></span>' +
+      ' <span style="display:inline-block;width:10px;height:10px;background:#5B88A5;border-radius:2px"></span>' +
+      ' <span style="display:inline-block;width:10px;height:10px;background:#406183;border-radius:2px"></span>' +
+      ' <span style="display:inline-block;width:10px;height:10px;background:#243A69;border-radius:2px"></span>' +
+      ' <small class="text-muted">more</small></div>';
 
     container.innerHTML = html;
   });

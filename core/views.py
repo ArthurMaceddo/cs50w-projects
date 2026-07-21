@@ -221,14 +221,14 @@ def flashcard_create(request):
         subject    = get_object_or_404(Subject, pk=subject_id, user=request.user)
         if front and back:
             Flashcard.objects.create(subject=subject, front=front, back=back)
-            messages.success(request, "Flashcard criado!")
+            messages.success(request, "Flashcard created!")
             return redirect("flashcard_list")
     return render(request, "flashcards/form.html", {"subjects": subjects})
 
 
 @login_required
 def flashcard_review_session(request):
-    """Retorna os flashcards devidos hoje como JSON para o JavaScript consumir."""
+    """Returns today's due flashcards as JSON for JavaScript consumption."""
     cards = Flashcard.objects.filter(
         subject__user=request.user,
         next_review_date__lte=date.today()
@@ -240,7 +240,7 @@ def flashcard_review_session(request):
 @login_required
 @require_POST
 def flashcard_submit_review(request, pk):
-    """API: salva a avaliação e atualiza next_review_date via SRS."""
+    """API: saves the review and updates next_review_date via SRS."""
     card   = get_object_or_404(Flashcard, pk=pk, subject__user=request.user)
     data   = json.loads(request.body)
     rating = data.get("rating", "wrong")

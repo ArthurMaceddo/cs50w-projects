@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,7 +43,7 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'subjects_list' %}"
-                ><i class="bi bi-book"></i> Matérias</a
+                ><i class="bi bi-book"></i> Subjects</a
               >
             </li>
             <li class="nav-item">
@@ -58,7 +58,7 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'goals_list' %}"
-                ><i class="bi bi-bullseye"></i> Metas</a
+                ><i class="bi bi-bullseye"></i> Goals</a
               >
             </li>
             <li class="nav-item">
@@ -69,16 +69,16 @@
                   class="nav-link btn btn-link border-0"
                   style="color: rgba(255, 255, 255, 0.55)"
                 >
-                  <i class="bi bi-box-arrow-right"></i> Sair {{ user.username }}
+                  <i class="bi bi-box-arrow-right"></i> Logout {{ user.username }}
                 </button>
               </form>
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}">Entrar</a>
+              <a class="nav-link" href="{% url 'login' %}">Log in</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'register' %}">Cadastrar</a>
+              <a class="nav-link" href="{% url 'register' %}">Sign up</a>
             </li>
             {% endif %}
           </ul>

@@ -64,7 +64,7 @@ function saveSession(durationMinutes) {
     })
     .then(res => res.json())
     .then(() => console.log("Saved Session!"))
-    .catch(err => console.error("Erro trying to save session:", err));
+    .catch(err => console.error("Error trying to save session:", err));
 }
 
 function onTimerEnd() {
@@ -79,7 +79,7 @@ function onTimerEnd() {
 
         const isLongBreak = cycleCount % CYCLES_BEFORE_LONG === 0;
         const breakMinutes = isLongBreak ? LONG_BREAK : SHORT_BREAK;
-        const breakLabel   = isLongBreak ? "Long Brake ☕" : "Short Brake 😌";
+        const breakLabel   = isLongBreak ? "Long Break ☕" : "Short Break 😌";
 
         sendNotification("Focus completed! 🎉", `Time to rest. ${breakLabel}`);
 
@@ -133,7 +133,7 @@ btnPause.addEventListener("click", function () {
         isRunning = false;
         btnStart.disabled = false;
         btnPause.disabled = true;
-        label.textContent = "Pausado ⏸️";
+        label.textContent = "Paused ⏸️";
     }
 });
 
