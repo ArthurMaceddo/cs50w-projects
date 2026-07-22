@@ -1,642 +1,428 @@
-# Technical Documentation - Study Manager
+# Technical Documentation — Study Manager
 
-Este documento registra o histórico de evoluções e funcionalidades do Study Manager, um projeto desenvolvido como Capstone do curso CS50W. A documentação segue uma estrutura baseada em commits semânticos, detalhando as alterações incrementais realizadas na base do sistema.
+This document records the development history of Study Manager, a project built as the Final Project for CS50W. Documentation follows a semantic commit structure, detailing each incremental change made to the codebase.
 
-Estrutura de Commits
-A mensagem segue o formato: <tipo>(<escopo opcional>): <descrição>
+## Commit Format
 
-Exemplo:  
-`feat(auth): configure authentication URL patterns`
+```
+<type>(<optional scope>): <description>
+```
 
-Para ler e se aprofundar mais nos commits semânticos , aqui estão as URLS que é possível ler e entender mais do assunto
+**Example:** `feat(auth): configure authentication URL patterns`
 
-https://www.conventionalcommits.org/pt-br/v1.0.0-beta.4/#especifica%c3%a7%c3%a3o
-
-https://dev.to/diegobrandao/padronizando-commits-git-com-um-script-bash-uma-solucao-simples-para-um-problema-comum-2bdl
-
-https://dev.to/diegobrandao/padronizando-commits-git-com-um-script-bash-uma-solucao-simples-para-um-problema-comum-2bdl
-
-<hr>
-
-# feat(auth): configure authentication URL patterns
-
-- **Importações**: Carrega as ferramentas de roteamento (`path`), as views de autenticação prontas do Django (`auth_views`) e as views personalizadas da sua aplicação (`. import views`).
-- **`urlpatterns`**: Lista que mapeia rotas HTTP para funções ou classes Python.
-- **Rotas**:
-  - `""`: Mapeia a URL base (`/`) para a função `dashboard` em `views.py`.
-  - `"login/"`: Utiliza a classe `LoginView` nativa do Django, injetando o template `login.html`.
-  - `"logout/"`: Utiliza a classe `LogoutView` nativa do Django para encerrar a sessão.
-  - `"register/"`: Mapeia a URL para a função `register` em `views.py`.
-- **`name`**: Atribui um identificador (apelido) à rota, permitindo que você use `{% url 'nome' %}` nos seus templates sem precisar alterar o caminho caso a URL mude.
-
-<span style="color:rgb(0, 176, 240)">auth<i>views.LoginView.as</i>view()</span> converte uma **Classe de View** do Django em uma **Função de View** (o formato que o `urls.py` espera).
-
-- **O que é**:
-  - `LoginView` é uma classe pronta do Django que encapsula toda a lógica de login (validar usuário/senha, criar sessão, redirecionar em caso de erro).
-- **O que o `.as_view()` faz**:
-  - Como o roteamento do Django (o arquivo `urls.py`) funciona através de funções que recebem uma requisição (`request`), o método `.as_view()` retorna uma função "wrapper" que, ao ser chamada:
-    1. Instancia a classe `LoginView`.
-    2. Configura a requisição atual.
-    3. Executa os métodos necessários (como `get` para renderizar o formulário ou `post` para processar o login).
-    4. Retorna a resposta HTTP final.
-
-<hr>
-
-# feat(models): create Subject model
-
-**models**: Definição da estrutura de dados para matérias de estudo.
-
-- `user`: Relacionamento 1:N com o usuário (`ForeignKey`), garantindo exclusão em cascata (`CASCADE`).
-- `name`: Campo de texto para o nome da matéria.
-- `description`: Campo de texto opcional para detalhes.
-- `color`: Armazena o código hexadecimal da cor associada à matéria (padrão: `#5B88A5`).
-- `created_at`: Data de criação automática.
-- **Metadados**: Ordenação padrão por nome (`Meta.ordering`).
-- **Método `__str__`**: Retorno amigável contendo o nome da matéria e o usuário proprietário.
-
-<hr>
-
-# feat(models): create Topic model
-
-**models**: Definição da estrutura de dados para tópicos de estudo vinculados a uma matéria.
-
-- `subject`: Relacionamento 1:N com o modelo `Subject` (`ForeignKey`), com exclusão em cascata.
-- `name`: Nome do tópico.
-- `notes`: Campo de texto para anotações detalhadas.
-- `is_completed`: Flag booleana para marcar progresso.
-- `order`: Campo inteiro para controle de ordenação manual.
-- `created_at`: Data de criação automática.
-- **Metadados**: Ordenação composta por prioridade (`order`) e data (`created_at`).
-- **Método `__str__`**: Identificação clara do tópico e sua matéria pai.
-
-<hr>
-
-# feat(models): create PomodoroSession
-
-- **models**: Definição da estrutura de dados para o registro de sessões de foco (Pomodoro).
-  - `user`: Relacionamento 1:N com o usuário.
-  - `subject`: Relacionamento 1:N com a matéria associada à sessão.
-  - `started_at`: Data e hora de início da sessão.
-  - `duration_minutes`: Duração da sessão em minutos (padrão: 25).
-  - `completed`: Flag booleana para status da sessão.
-  - **Metadados**: Ordenação decrescente por data de início (`-started_at`).
-  - **Método `__str__`**: Exibição formatada com status (ícone) e data.
-
-<hr>
-
-# feat(models): implement busciness logic methods for subject model
-
-- **`progress()`**:
-  - **Finalidade**: Quantificar o desempenho acadêmico do usuário em uma matéria específica.
-  - **Lógica**:
-    1. `topics = self.topics.all()`: Utiliza o `related_name` definido anteriormente para acessar todos os tópicos vinculados à matéria.
-    2. **Validação**: `if not topics.exists(): return 0` previne o erro de divisão por zero (caso a matéria esteja vazia).
-    3. **Cálculo**: Filtra apenas os tópicos com `is_completed=True`, conta-os e divide pelo total. O resultado é multiplicado por 100 e convertido para `int` para exibição percentual.
-- **`total_study_minutes()`**:
-  - **Finalidade**: Agregação de dados temporais para métricas de produtividade.
-  - **Lógica**:
-    1. `sessions = self.pomodoro_sessions.filter(completed=True)`: Seleciona apenas as sessões de Pomodoro finalizadas.
-    2. **Agregação**: Utiliza uma _list comprehension_ dentro da função `sum()` para somar o atributo `duration_minutes` de cada instância encontrada.
-
-<hr>
-
-# feat(models): create Flashcard model
-
-- **models**: Definição da estrutura para cartões de memória.
-  - `subject`: Relacionamento 1:N com a matéria.
-  - `front` / `back`: Conteúdo (pergunta e resposta).
-  - `next_review_date`: Data da próxima revisão (default: data atual).
-  - `interval_days`: Intervalo de dias entre revisões (default: 1).
-  - `__str__` (com `:50`): Corta de string que limita a exibição do `front` a 50 caracteres para manter a interface limpa.
-  - `is_due_today()`: Validador booleano que compara `next_review_date` com a data atual. Retorna `True` se a revisão for necessária hoje ou se o cartão estiver atrasado.
-- **Algoritmo de Revisão - `apply_review(rating)`**:
-  - **Objetivo**: Implementar o sistema de **Repetição Espaçada (SRS)**, que ajusta dinamicamente quando você verá o cartão novamente com base na sua performance:
-    - **`easy`**: O usuário dominou o conteúdo. O intervalo atual é dobrado (mínimo de 7 dias) para que o cartão volte a aparecer apenas no futuro distante.
-    - **`hard`**: O usuário teve dificuldade. O intervalo é mantido ou ajustado para 2 dias, forçando uma revisão mais próxima.
-    - **`wrong`**: O usuário errou. O intervalo é resetado para 1 dia, reiniciando o ciclo de aprendizado.
-  - **Persistência**: Após definir o novo `interval_days`, o método calcula a `next_review_date` somando o novo intervalo à data atual e executa `self.save()` para persistir a alteração no banco de dados imediatamente.
-- **`self.next_review_date`**
-  - **`date.today()`**: Pega a data de hoje (baseada no calendário do sistema).
-- **`timedelta(days=self.interval_days)`**: Cria um "delta" (uma diferença de tempo). Se `interval_days` for 7, isso representa um intervalo de exatamente 7 dias.
-- **A soma (`+`)**: O Django/Python permite somar uma data com um `timedelta`. O resultado é uma nova data, exatamente `X` dias no futuro.
-- **Atribuição**: O resultado dessa conta é salvo no campo `next_review_date`, que é o campo que o seu sistema usa para saber quando aquele cartão deve "aparecer" novamente para o usuário.
-- **Metadados**: Ordenação por prioridade (`next_review_date`), garantindo que os cartões atrasados apareçam primeiro no fluxo de estudo.
-
-<hr>
-
-# feat(models): create FlashcardReview
-
-- **models**: Definição da estrutura que registra o histórico de cada revisão realizada em um `Flashcard`.
-  - `RATING_CHOICES`: Enumeração das opções de avaliação (`easy`, `hard`, `wrong`), garantindo integridade dos dados através de uma lista de escolhas fixas.
-  - `flashcard`: Relacionamento 1:N com o modelo `Flashcard`, permitindo rastrear o histórico completo de desempenho de cada cartão.
-  - `rating`: Campo de caracteres que armazena a avaliação selecionada pelo usuário.
-  - `reviewed_at`: Data e hora exatas da revisão, preenchidas automaticamente (`auto_now_add`).
-  - **Método `__str__`**: Representação textual do log, incluindo o cartão, a nota recebida e a data, facilitando a visualização no painel administrativo.
-  - **Metadados**: Ordenação por ordem cronológica decrescente (`-reviewed_at`), exibindo sempre as revisões mais recentes no topo da lista.
-
-### Por que criar este modelo?
-
-Diferente do modelo `Flashcard` que guarda o **estado atual** (quando ver o cartão novamente), o `FlashcardReview` guarda o **histórico de esforço**. Com essa estrutura, você pode no futuro gerar gráficos de progresso, calcular a taxa de acerto por matéria ou identificar quais cartões você tem mais dificuldade de memorizar.
-
-<hr>
-
-# feat(models): create WeeklyGoal
-
-- - `subject`: Relacionamento com a matéria alvo.
-    - `target_hours`: Meta de horas a serem cumpridas na semana (campo `FloatField`).
-    - `week_start`: Data de início da semana (deve ser sempre uma segunda-feira).
-    - **`current_hours()`**: Método que calcula o progresso real. Filtra as sessões de `PomodoroSession` concluídas dentro do intervalo de 7 dias a partir de `week_start`, converte a soma dos minutos para horas e arredonda para uma casa decimal.
-    - **`percentage()`**: Calcula o progresso percentual atingido, com trava de limite em 100% para evitar exibição de valores superiores caso o usuário ultrapasse a meta.
-- **Metadados e Integridade**:
-  - `ordering`: Ordena por data e matéria.
-  - `unique_together`: Impede a criação de múltiplas metas para a mesma matéria, pelo mesmo usuário, na mesma semana, garantindo consistência dos dados.
-
-### Observações Técnicas
-
-- **Filtro por `range`**: A lógica em `current_hours()` utiliza `started_at__date__range` para isolar exatamente a semana da meta. Isso permite que o sistema saiba, em tempo real, quanto falta para atingir o objetivo da semana corrente.
-- **Validação de Negócio**: O `unique_together` é a "chave" para evitar inconsistências, garantindo que cada meta semanal seja única e fácil de consultar pela interface.
-
-<hr>
-
-# feat(urls): configure CRUD URL patterns for Subject model
-
-- **urls**: Mapeamento dos endpoints para o CRUD (Create, Read, Update, Delete) do modelo `Subject`:
-  - `subjects/`: Lista todas as matérias (`subjects_list`).
-  - `subjects/new/`: Formulário para criar uma nova matéria (`subject_create`).
-  - `subjects/<int:pk>/`: Detalhes de uma matéria específica identificada pela sua Primary Key (`subject_detail`).
-  - `subjects/<int:pk>/edit/`: Edição de uma matéria existente (`subject_edit`).
-  - `subjects/<int:pk>/delete/`: Remoção de uma matéria (`subject_delete`).
-
-### Observação Técnica
-
-- **`<int:pk>`**: É um **path converter**. Ele instrui o Django a capturar o valor após a barra como um número inteiro (`int`) e passá-lo para a view correspondente como o argumento `pk` (Primary Key). Isso é o padrão para identificar instâncias específicas de modelos no banco de dados.
-
-https://docs.djangoproject.com/en/6.0/topics/http/urls/ - Dispatcher
-https://codingnomads.com/what-is-path-converter - Patch Converter
-
-<hr>
-
-# feat(urls): add URL patterns for Topic
-
-- **urls**: Mapeamento dos endpoints para manipulação de tópicos via API:
-  - `topics/new/`: Endpoint para criação de um novo tópico (`topic_create`).
-  - `topics/<int:pk>/toggle/`: Endpoint para alternar o status de conclusão (`is_completed`) de um tópico específico (`topic_toggle`).
-  - `topics/<int:pk>/delete/`: Endpoint para remoção de um tópico (`topic_delete`).
-
-### Observação Técnica
-
-- **`toggle`**: Esta rota é desenhada para interações via JavaScript (fetch/AJAX). Em vez de renderizar uma página completa, este endpoint normalmente apenas atualiza o banco de dados e retorna uma resposta JSON confirmando o novo status (`True` ou `False`), permitindo que a interface do usuário seja atualizada dinamicamente sem recarregar a página.
-
-<hr>
-
-# feat(urls): add URL patterns for Flashcard
-
-- - `flashcards/`: Exibe a lista de todos os cartões (`flashcard_list`).
-    - `flashcards/new/`: Formulário de criação de novo cartão (`flashcard_create`).
-    - `flashcards/review/`: Inicia uma sessão de estudo baseada na repetição espaçada (`flashcard_review_session`).
-    - `flashcards/<int:pk>/delete/`: Remove um cartão específico (`flashcard_delete`).
-    - `flashcards/<int:pk>/submit/`: Endpoint de processamento para submeter a avaliação (`easy`, `hard`, `wrong`) de uma revisão (`flashcard_submit_review`).
-
-### Observação Técnica
-
-- **`flashcard_review` vs `flashcard_submit`**: A separação entre esses endpoints é de sua extrema importância . Enquanto `review` prepara o contexto para o usuário estudar, o `submit` atua como um endpoint de API que recebe os dados do formulário/interação do usuário, executa a lógica de cálculo do SRS (`apply_review`) e redireciona ou retorna a confirmação de atualização do estado do cartão.
-
-<hr>
-
-# feat(urls): add URL patterns for Pomodoro
-
-- **urls**: Mapeamento dos endpoints para o sistema de foco (timer):
-  - `pomodoro/`: Carrega a interface principal do temporizador Pomodoro (`pomodoro`).
-  - `pomodoro/save/`: Endpoint para persistir o registro da sessão no banco de dados após o término do tempo (`pomodoro_save`).
-
-### Observação Técnica
-
-- **Separação de responsabilidades**: O endpoint `pomodoro` renderiza a página de trabalho, enquanto o `pomodoro_save` atua como um _callback_ (geralmente via `POST` request disparado pelo JavaScript ao final dos 25 minutos). Isso garante que o registro da sessão no banco de dados ocorra de forma assíncrona, mantendo a integridade dos seus dados de produtividade sem a necessidade de recarregar a interface.
-
-<hr>
-
-# feat(urls): add URL patterns for Goals
-
-- **urls**: Mapeamento dos endpoints para o gerenciamento de `WeeklyGoal`:
-  - `goals/`: Exibe o painel com as metas semanais cadastradas (`goals_list`).
-  - `goals/new/`: Formulário para definir uma nova meta de horas de estudo (`goal_create`).
-  - `goals/<int:pk>/delete/`: Remoção de uma meta específica (`goal_delete`).
-
-### Observação Técnica
-
-- **Gestão de Metas**: Estas rotas permitem o controle do ciclo de vida das metas. Ao utilizar `pk` na rota de deleção, o sistema garante que apenas a meta específica daquela matéria e semana seja removida, mantendo a integridade dos históricos de estudo que possam ter sido registrados anteriormente.
-
-<hr>
-
-# feat(urls): add URL patterns for Dashboard
-
-- **urls**: Mapeamento do endpoint para monitoramento de desempenho:
-  - `dashboard/activity/`: Acessa a view `dashboard_activity`, responsável por compilar e exibir os dados agregados das sessões de estudo, progresso de tópicos e metas alcançadas.
-
-### Observação Técnica
-
-- **Analytics do Sistema**: Este endpoint centraliza a lógica de leitura de dados. Diferente das outras rotas que gerenciam entidades individuais (CRUDS), esta rota serve como uma **View de Resumo**, onde você provavelmente consome os métodos de cálculo que definimos nos modelos (`progress()`, `current_hours()`, etc.) para gerar visualizações de progresso para o usuário.
-
-# -----------------------><span style="color:rgb(255, 255, 0)">VIEWS</span> <--------------------------
-
-# feat(views): create initial view stubs for all application endpoints
-
-**views**: Implementação da estrutura inicial (boilerplate) para todas as funções da aplicação.
-
-- **Objetivo**: Estabelecer o contrato entre as URLs definidas e a lógica de negócio, garantindo que o servidor Django inicie sem erros de importação (`ImportError` ou `AttributeError`).
-- **Implementação**: Criação de funções básicas para todos os módulos (Auth, Subjects, Topics, Flashcards, Pomodoro, Goals e Analytics), retornando `HttpResponse` temporários para validar a conectividade de cada endpoint.
-- **Manutenibilidade**: Este esqueleto serve como a base para o desenvolvimento incremental, permitindo que cada funcionalidade seja preenchida com a lógica real de banco de dados e templates de forma isolada e segura.
-
-<hr>
-
-# feat(auth): implement registration and logout logic
-
-- **`register(request)`**:
-  - **POST**: Processa o `UserCreationForm`. Se válido, salva o usuário, realiza o login automático e redireciona para o `dashboard`, exibindo uma mensagem de sucesso via `django.contrib.messages`.
-  - **GET**: Exibe um formulário em branco para o cadastro.
-- **`logout_view(request)`**:
-  - Encerra a sessão do usuário atual e redireciona para a página inicial (`index`), garantindo a limpeza dos dados de sessão no servidor.
-
-### Observação Técnica
-
-- **Segurança**: O uso de `UserCreationForm` (nativo do Django) é a prática recomendada, pois ele já cuida da validação de senhas, verificação de força e sanitização de dados, prevenindo vulnerabilidades comuns de injeção e manipulação de credenciais.
-
-https://docs.djangoproject.com/en/6.0/topics/auth/default/ - UserCreationForm
-
-<hr>
-
-# feat(views): Implement CRUD views for Subject model
-
-- **`subjects_list(request)`**: Lista todas as matérias associadas ao usuário logado, garantindo isolamento de dados.
-- **`subject_create(request)`**: Processa a criação de uma nova matéria. Utiliza `.strip()` (serve para remover espaços em branco no início e no fim de uma string) e define um valor padrão para a cor caso não seja informada.
-- **`subject_detail(request, pk)`**: Recupera uma matéria específica do usuário (`get_object_or_404`) e exibe seus tópicos relacionados.
-- **`subject_edit(request, pk)`**: Realiza a edição das propriedades da matéria e persiste as alterações no banco de dados.
-- **`subject_delete(request, pk)`**: Gerencia a remoção da matéria através de uma requisição `POST`, garantindo que a exclusão seja intencional.
-
-### Observações Técnicas
-
-- **Segurança (Data Isolation)**: Todas as queries filtram pelo `user=request.user`. Isso é crucial para que um usuário não consiga acessar ou manipular matérias de outro usuário ao manipular o ID (`pk`) na URL.
-- **User Experience (UX)**: A utilização do `messages` fornece confirmação visual ao usuário após cada ação (criação, edição ou deleção), elevando a usabilidade da aplicação.
-- **`get_object_or_404`**: Esta função é um atalho profissional do Django que retorna automaticamente uma página de erro 404 caso o objeto não exista ou não pertença ao usuário, evitando erros de servidor (`DoesNotExist`).
-
-<hr>
-
-# feat(views): Implement CRUD views for Topic model
-
-- **`topic_create(request)`**:
-  - Utiliza o decorador `@require_POST` para garantir que a criação ocorra apenas via envio de formulário.
-  - Valida a existência da matéria antes da criação, garantindo que o tópico seja vinculado corretamente ao usuário autenticado.
-- **`topic_toggle(request, pk)`**:
-  - Endpoint assíncrono (API) para alternar o status `is_completed`.
-  - Retorna um JSON contendo o novo estado e o percentual de progresso atualizado da matéria, permitindo atualização instantânea do front-end sem recarregar a página.
-- **`topic_delete(request, pk)`**:
-  - Remove o tópico e retorna um JSON com a confirmação de exclusão e o novo progresso da matéria pai.
-
-### Observações Técnicas
-
-- **Consistência de Dados**: Ao retornar o `progress()` dentro das respostas JSON de `toggle` e `delete`, você possibilita que a interface (dashboard ou página de detalhes) reflita o progresso real em tempo real sempre que uma interação ocorre.
-- **Segurança**: O filtro `subject__user=request.user` garante que, mesmo em uma API, um usuário só consiga manipular tópicos que pertencem às suas próprias matérias.
-
-<hr>
-
-# feat(views): implement Pomodoro session management
-
-- **`pomodoro(request)`**:
-  - Renderiza o timer.
-  - Carrega a lista de matérias (`subjects`) para o usuário associar o tempo de estudo.
-  - Busca as últimas 10 sessões concluídas (`recent`) para exibir um histórico rápido de produtividade.
-- **`pomodoro_save(request)`**:
-  - Processa o JSON enviado pelo timer ao finalizar a contagem.
-  - Persiste a instância de `PomodoroSession` vinculando-a ao usuário e à matéria selecionada.
-
-### Observações Técnicas
-
-- **`json.loads(request.body)`**: Como o Pomodoro é um timer que roda no cliente (JavaScript), o `pomodoro_save` espera um `POST` contendo dados estruturados em JSON em vez de um formulário padrão. Isso oferece maior flexibilidade para o seu front-end.
-- **Data/Hora**: A utilização de `datetime.now()` registra o momento exato da finalização (ou salvamento) no servidor. Dependendo do seu deploy, considere utilizar `django.utils.timezone.now()` para manter a consistência de fusos horários globalmente.
-- **Segurança**: Assim como nas outras rotas, a validação `user=request.user` garante que apenas sessões legítimas sejam criadas, protegendo seus dados de Analytics contra requisições maliciosas.
-
-<hr>
-
-# feat(views): Implement WeeklyGoal CRUD operations
-
-* **`goals_list(request)`**:
-* Calcula dinamicamente a data de início da semana (segunda-feira) utilizando `date.today()` e `weekday()`.
-* Exibe apenas as metas pertinentes à semana corrente, garantindo que o usuário visualize sempre o progresso atual.
-
-
-* **`goal_create(request)`**:
-* Utiliza `update_or_create` para gerenciar as metas. Isso é fundamental para evitar a duplicação de dados, permitindo que o usuário altere a meta de uma matéria na mesma semana sem criar registros conflitantes.
-* Assegura que a meta esteja vinculada estritamente às matérias do usuário logado.
-
-
-* **`goal_delete(request, pk)`**:
-* Permite a remoção de metas registradas, protegendo a operação com o filtro de propriedade do usuário.
-
-### Observações Técnicas
-
-* **Lógica de Calendário**: A subtração `today - timedelta(days=today.weekday())` é a maneira mais eficiente em Python puro para normalizar qualquer data para a segunda-feira daquela semana. Isso padroniza o seu banco de dados, facilitando queries futuras.
-* **Idempotência**: O uso de `update_or_create` torna a aplicação muito mais robusta. O usuário não precisa se preocupar se ele já criou a meta antes; o sistema apenas atualiza o valor da meta de horas caso ela já exista para aquela semana.
-
-<hr>
-
-# feat(views): Implement dashboard and activity analytics views
-
-* **`dashboard(request)`**:
-* Centraliza a inteligência do sistema: calcula o total de flashcards pendentes de revisão, horas de estudo na semana atual, progresso em metas semanais (`WeeklyGoal`) e o cálculo de *streak* (dias consecutivos de estudo).
-* Prepara o contexto completo para a home page do usuário com métricas de produtividade.
-
-
-* **`dashboard_activity(request)`**:
-* Endpoint de API focado em analytics: agrupa o número de sessões Pomodoro concluídas nos últimos 12 meses (agrupadas por dia).
-* Retorna um `JsonResponse` formatado para consumo por bibliotecas de gráficos (como Chart.js ou D3.js).
-
+**Further reading on semantic commits:**
+- https://www.conventionalcommits.org/en/v1.0.0/
+- https://dev.to/diegobrandao/padronizando-commits-git-com-um-script-bash-uma-solucao-simples-para-um-problema-comum-2bdl
 
 ---
 
-### Observações Técnicas
+## `feat(auth): configure authentication URL patterns`
 
-* **Cálculo de Streak**: A implementação utiliza um loop `while` reverso (`check_date -= timedelta(days=1)`), que é uma forma eficiente de verificar a continuidade do estudo sem precisar processar todo o histórico do banco de dados de uma vez.
-* **Agregação de Dados**: No `dashboard_activity`, a utilização de `.values("started_at__date")` otimiza a consulta ao banco, extraindo apenas a informação necessária para o processamento do dicionário de contagens.
-* **Performance**: O uso de métodos como `count()` e a filtragem inteligente garantem que o dashboard carregue métricas pesadas de forma rápida, mesmo com o aumento do volume de dados do usuário.
+Sets up the URL routing for all authentication-related endpoints.
 
-<hr>
+- **Imports:** Loads `path` for routing, Django's built-in `auth_views`, and the app's custom `views`.
+- **`urlpatterns`:** List that maps HTTP routes to Python functions or classes.
+- **Routes:**
+  - `""` → maps the base URL (`/`) to the `dashboard` view.
+  - `"login/"` → uses Django's built-in `LoginView`, injecting `login.html` as the template.
+  - `"logout/"` → uses Django's built-in `LogoutView` to end the session.
+  - `"register/"` → maps the URL to the custom `register` view.
+- **`name`:** Assigns an alias to each route, allowing `{% url 'name' %}` in templates without hardcoding paths.
 
-# fix(views): enforce authentication and HTTP method constraints
-
-* **Segurança de Acesso (`@login_required`)**:
-* Aplicado às views de gerenciamento (Subjects, Goals, Dashboard, etc.) para garantir que usuários não autenticados sejam redirecionados para a tela de login.
-
-
-* **Integridade de Ação (`@require_POST`)**:
-* Reforçado nos métodos que alteram estado no banco de dados (`create`, `edit`, `delete`, `save`), evitando que ações destrutivas ou de escrita sejam executadas via requisições `GET` acidentais (ex: busca de robôs ou erro de digitação de URL).
-
+> **Note on `.as_view()`:** `LoginView` is a class-based view. Since Django's URL dispatcher expects a callable function, `.as_view()` returns a wrapper function that instantiates the class, sets up the request, runs the appropriate method (`get` or `post`), and returns the HTTP response.
 
 ---
 
-### Observação Técnica
+## `feat(models): create Subject model`
 
-* **Proteção contra CSRF**: Ao combinar `@require_POST` com os formulários do Django (que utilizam a tag `{% csrf_token %}`), é criado uma camada de segurança robusta contra ataques de *Cross-Site Request Forgery*.
+Defines the data structure for academic subjects.
 
-<hr>
-
-# feat(templates) - Implement base layout with navigation and global messaging
-
-* **Estrutura (`base.html`)**: Implementação do template mestre utilizando o sistema de herança do Django (`{% block content %}`).
-* **Componentes Globais**:
-* **Navegação (Navbar)**: Menu de navegação responsivo (Bootstrap 5) com links para todos os módulos (Dashboard, Matérias, Flashcards, Pomodoro, Metas) e botão de Logout, condicionado ao estado de autenticação (`user.is_authenticated`).
-* **Sistema de Mensagens**: Integração automática do `django.contrib.messages` exibindo alertas dinâmicos (sucesso, erro, aviso) que aparecem antes de cada `block content`, proporcionando feedback imediato ao usuário.
-
-
-* **Ativos**:
-* Integração com **Bootstrap 5** (CSS/JS) para o grid e componentes.
-* Integração com **Bootstrap Icons** para identidade visual dos módulos.
-* Configuração de link para arquivo CSS estático personalizado (`{% static 'css/styles.css' %}`).
-
-
+- `user` — `ForeignKey` to `User` (1:N), with `CASCADE` deletion.
+- `name` — text field for the subject name.
+- `description` — optional text field for additional details.
+- `color` — stores the hex color code associated with the subject (default: `#5B88A5`).
+- `created_at` — auto-populated creation timestamp.
+- **`Meta.ordering`** — default ordering by name.
+- **`__str__`** — returns a human-readable label with the subject name and owner username.
 
 ---
 
-### Observação Técnica
+## `feat(models): create Topic model`
 
-* **Herança de Blocos**: A estrutura utiliza `{% block title %}`, `{% block content %}` e `{% block scripts %}`, permitindo que páginas filhas injetem conteúdo específico sem a necessidade de reescrever o layout da navbar ou scripts de carregamento global.
-* **UX/UI**: A utilização do formulário `POST` para o `logout` respeita a segurança do Django contra CSRF, garantindo que o encerramento da sessão não ocorra por erro ou indexação indevida.
-* **Bootstrap**: A escolha pelo Bootstrap 5 garante um layout profissional e *mobile-first* com esforço mínimo de CSS customizado, ideal para um MVP de Capstone.
+Defines the data structure for study topics linked to a subject.
 
-<hr>
-
-# feat(frontend): implement activity heatmap rendering script
-
-* **Fetch API**: Realiza uma requisição assíncrona ao endpoint `/dashboard/activity/` para recuperar o dicionário de contagem de sessões dos últimos 12 semanas.
-* **Geração Dinâmica (`HTML Grid`)**: Itera retroativamente pelos últimos 84 dias (12 semanas $\times$ 7 dias), formatando a data no padrão ISO `YYYY-MM-DD` para corresponder às chaves retornadas pela API.
-* **Mapeamento de Cores (Intensidade)**:
-* `0 sessões`: `#ebedf0` (vazio/cinza claro)
-* `1 sessão`: `#9be9a8` (verde claro)
-* `2 sessões`: `#40c463` (verde médio)
-* `>= 3 sessões`: `#216e39` (verde escuro)
-
-
-* **Legenda e Tooltips**: Adiciona atributos `title` nativos para exibir o detalhamento de data e quantidade por quadradinho, acompanhado de uma legenda textual indicando a escala de atividade ("menos" a "mais").
+- `subject` — `ForeignKey` to `Subject` (1:N), with `CASCADE` deletion.
+- `name` — topic name.
+- `notes` — optional text field for detailed notes.
+- `is_completed` — boolean flag to track completion.
+- `order` — integer field for manual ordering.
+- `created_at` — auto-populated creation timestamp.
+- **`Meta.ordering`** — composite ordering by `order` then `created_at`.
+- **`__str__`** — returns the topic name alongside its parent subject.
 
 ---
 
-### Observação Técnica
+## `feat(models): create PomodoroSession model`
 
-* **GitHub-style Contribution Grid**: Essa implementação replica o design visual dos gráficos de contribuição do GitHub no front-end utilizando divs com flexbox, consumindo diretamente o JSON gerado pela view `dashboard_activity` que criamos anteriormente.
+Defines the data structure for recording Pomodoro focus sessions.
 
-<hr>
-
-# feat(templates): implement user dashboard template with analytics and overview cards
-
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) sobrescrevendo os blocos de título (`title`), conteúdo (`content`) e scripts (`scripts`).
-* **Cards de Resumo**: Exibição em grid (Bootstrap 5) dos contadores principais (`total_subjects`, `total_flashcards`, `week_hours` e contagem de `streak`).
-* **Alertas e Metas**: Alerta condicional para flashcards pendentes de revisão (`due_cards`) e barras de progresso dinâmicas baseadas nas cores e horas cumpridas de cada `WeeklyGoal`.
-* **Histórico e Heatmap**: Listagem de sessões recentes de estudo e carregamento do container do heatmap de atividades através do script customizado `dashboard.js`.
-
-<hr>
-
-# feat(templates): implement user registration template with auth card layout
-
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Cadastrar".
-* **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`).
-* **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}`.
-* **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que já possuem cadastro na plataforma (`login`).
-
-<hr>
-
-# feat(templates): implement user login template with auth card layout
-
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Entrar".
-* **Card de Autenticação**: Estrutura de formulário encapsulada em um container centralizado (`auth-card`) mantendo a coerência visual com a página de cadastro.
-* **Segurança de Formulário**: Injeção obrigatória do token de proteção contra falsificação de requisições (`{% csrf_token %}`) e renderização automática dos campos via `{{ form.as_p }}` do Django.
-* **Navegação Auxiliar**: Link de redirecionamento integrado para usuários que ainda não possuem cadastro na plataforma (`register`).
-
-<hr>
-
-# fix(config): configure static files and authentication redirect paths
-
-* **Configuração de Arquivos Estáticos**: Adicionou `STATIC_URL` e `STATIC_ROOT` utilizando `BASE_DIR / 'staticfiles'`, preparando o projeto para coletar e servir arquivos estáticos de forma correta (essencial para ambientes de produção ou coleta com `collectstatic`).
-* **Rotas de Autenticação Globais**: Definidas as constantes `LOGIN_URL`, `LOGIN_REDIRECT_URL` e `LOGOUT_REDIRECT_URL` para direcionar o fluxo de sessões do usuário de forma automatizada pelo Django.
-* **Roteamento Raiz (`urls.py`)**: Inclusão de `path('', include('core.urls'))` no arquivo principal de URLs do projeto, conectando o roteador central diretamente às rotas da aplicação `core`.
+- `user` — `ForeignKey` to `User` (1:N).
+- `subject` — `ForeignKey` to `Subject` (1:N).
+- `started_at` — date and time the session began.
+- `duration_minutes` — session length in minutes (default: 25).
+- `completed` — boolean flag for session status.
+- **`Meta.ordering`** — descending by `started_at` (most recent first).
+- **`__str__`** — formatted string showing a status icon, subject name, duration, and date.
 
 ---
 
-### Observação Técnica
+## `feat(models): implement business logic methods for Subject model`
 
-* **`STATIC_ROOT`**: Especifica o diretório absoluto onde o comando `collectstatic` reunirá todos os arquivos estáticos da aplicação para servi-los eficientemente em produção.
-* **Fluxo de Redirecionamento**: Configurar `LOGIN_REDIRECT_URL = "/"` e `LOGOUT_REDIRECT_URL = "/login/"` garante que o `@login_required` e os componentes de login/logout saibam exatamente para onde encaminhar o usuário após autenticar ou encerrar a sessão.
+Adds computed methods directly on the `Subject` model.
 
-<hr>
+- **`progress()`**
+  - Queries all related `Topic` objects via the `related_name`.
+  - Guards against division by zero when no topics exist.
+  - Returns the percentage of topics marked `is_completed=True` as an integer.
 
-# feat(templates): implement subjects list template with card grid and progress indicators
+- **`total_study_minutes()`**
+  - Filters `PomodoroSession` records linked to this subject where `completed=True`.
+  - Uses a list comprehension inside `sum()` to aggregate `duration_minutes`.
 
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Subjects".
-* **Cabeçalho de Ação**: Título com ícone e botão de atalho para a criação de uma nova matéria (`subject_create`).
-* **Grid de Matérias (`Responsive Cards`)**: Itera sobre a lista de matérias usando um sistema de colunas adaptativo (`col-12 col-md-6 col-lg-4`). Cada card exibe:
-* Indicador visual de cor dinâmico (`subject.color`).
-* Descrição opcional truncada.
-* Barra de progresso percentual calculada via método do modelo (`subject.progress`).
-* Ações rápidas de navegação (`subject_detail`), edição (`subject_edit`) e exclusão (`subject_delete`).
+---
 
+## `feat(models): create Flashcard model`
 
-* **Estado Vazio (`Empty State`)**: Exibição condicional de mensagem informativa com ícone centralizado caso o usuário não possua nenhuma matéria cadastrada.
+Defines the data structure for memory cards with spaced repetition support.
 
-<hr>
+- `subject` — `ForeignKey` to `Subject` (1:N).
+- `front` / `back` — text fields for the question and answer sides.
+- `next_review_date` — date of the next scheduled review (default: today).
+- `interval_days` — current interval between reviews in days (default: 1).
+- **`__str__`** — truncates `front` to 50 characters for readability in the admin panel.
+- **`is_due_today()`** — returns `True` if `next_review_date` is on or before today.
+- **`apply_review(rating)`** — implements the SRS algorithm:
+  - `"easy"` → doubles the current interval (minimum 7 days).
+  - `"hard"` → sets interval to 2 days.
+  - `"wrong"` → resets interval to 1 day.
+  - After computing the new `interval_days`, adds it to `date.today()` using `timedelta` and saves the updated `next_review_date` to the database.
+- **`Meta.ordering`** — ordered by `next_review_date` so overdue cards appear first.
 
-# feat(templates): implement subject form template for create and edit actions
+---
 
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) com título dinâmico baseado na variável de ação (`{{ action }} Matéria`).
-* **Estrutura de Formulário**: Layout centralizado em largura otimizada (`col-12 col-md-6`) para melhor usabilidade em telas médias e grandes.
-* **Campos e Validação**:
-* Campo `name` obrigatório, injetando o valor atual caso esteja em modo de edição (`{{ subject.name|default:'' }}`).
-* Campo `description` em textarea opcional.
-* Seletor de cor customizado (`input type="color"`) utilizando o padrão do Bootstrap (`form-control-color`) e valor padrão de fallback (`#4A90D9`).
+## `feat(models): create FlashcardReview model`
 
+Defines an audit log for every flashcard review event.
 
-* **Ações**: Botões de submissão para persistir dados e link de cancelamento com retorno direto para a listagem (`subjects_list`).
+- `RATING_CHOICES` — enforces valid values (`easy`, `hard`, `wrong`) at the database level.
+- `flashcard` — `ForeignKey` to `Flashcard` (1:N), enabling full review history per card.
+- `rating` — stores the selected evaluation.
+- `reviewed_at` — auto-populated review timestamp (`auto_now_add`).
+- **`__str__`** — readable log entry with card reference, rating, and date.
+- **`Meta.ordering`** — descending by `reviewed_at` (most recent first).
 
-<hr>
+> **Why this model?** While `Flashcard` stores the *current state* (when to review next), `FlashcardReview` stores the *effort history*. This enables future features like accuracy charts per subject or identification of the hardest cards.
 
-# feat(templates): implement subject detail template with interactive topic list and progress sync`
+---
 
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) usando o nome da matéria como título dinâmico (`{{ subject.name }}`).
-* **Cabeçalho de Progresso**: Exibição da cor identificadora da matéria, título e um badge com a barra de progresso sincronizada em tempo real (`{{ subject.progress }}`).
-* **Gerenciamento de Tópicos**:
-* Formulário integrado para a adição rápida de novos tópicos vinculados ao ID da matéria atual (`topic_create`).
-* Listagem interativa com caixas de seleção dinâmicas (`topic-toggle`) e botões de remoção (`topic-delete`).
-* Aplicação condicional de classes de texto riscado (`text-decoration-line-through`) para itens concluídos.
+## `feat(models): create WeeklyGoal model`
 
+Defines the data structure for weekly study hour targets.
 
-* **Scripts e Configuração**: Injeção de variáveis globais via template tag script (`TOGGLE_URL`, `DELETE_URL`, `CSRF_TOKEN`) para consumo pelo script assíncrono `topics.js`.
+- `subject` — `ForeignKey` to the target subject.
+- `target_hours` — `FloatField` representing the weekly hour goal.
+- `week_start` — date anchored to Monday of the target week.
+- **`current_hours()`** — filters completed `PomodoroSession` records within the 7-day window starting at `week_start`, converts the total minutes to hours, and rounds to one decimal place.
+- **`percentage()`** — returns completion ratio capped at 100%.
+- **`Meta.ordering`** — ordered by `week_start` and `subject`.
+- **`unique_together`** — prevents duplicate goals for the same user, subject, and week.
 
-<hr>
+> **Technical note:** The `started_at__date__range` filter in `current_hours()` isolates exactly the current week. `update_or_create` in the view layer makes goal creation idempotent — updating an existing goal instead of creating duplicates.
 
-# feat(frontend): implement asynchronous topic toggle and deletion logic with progress updates`
+---
 
-* **Toggle de Conclusão**: Intercepta o evento `change` dos checkboxes de tópicos, disparando uma requisição assíncrona (`POST`) via Fetch API com o token CSRF adequado. Atualiza visualmente o texto do tópico (riscado/cinza) e recalcula as barras e badges de progresso da página em tempo real.
-* **Exclusão de Tópicos**: Intercepta o clique nos botões de lixeira com confirmação nativa (`confirm`), disparando uma requisição `DELETE` assíncrona para o endpoint correspondente e removendo o elemento do DOM em caso de sucesso.
+## `feat(urls): configure CRUD URL patterns for Subject model`
 
-<hr>
+Maps the five standard CRUD endpoints for `Subject`:
 
-# feat(templates): implement subject deletion confirmation template 
+| URL | View | Action |
+|---|---|---|
+| `subjects/` | `subjects_list` | List all subjects |
+| `subjects/new/` | `subject_create` | Create new subject |
+| `subjects/<int:pk>/` | `subject_detail` | View subject details |
+| `subjects/<int:pk>/edit/` | `subject_edit` | Edit subject |
+| `subjects/<int:pk>/delete/` | `subject_delete` | Delete subject |
 
-* **Extensão de Layout**: Herança do arquivo base (`{% extends "layout.html" %}`) definindo o título "Excluir Matéria".
-* **Card de Alerta**: Container com borda destacada em vermelho (`border-danger`) e ícone de aviso (`bi-exclamation-triangle-fill`) para alertar o usuário sobre o risco de perda permanente de dados.
-* **Mensagem de Confirmação**: Exibe o nome da matéria alvo (`{{ subject.name }}`) e avisa sobre a exclusão em cascata de elementos vinculados (tópicos, flashcards e sessões).
-* **Ações**: Formulário protegido com token `{% csrf_token %}` contendo botão de confirmação destrutiva (`btn-danger`) e link de cancelamento com retorno à listagem (`subjects_list`).
+> **`<int:pk>`** is a path converter that captures an integer from the URL and passes it to the view as the `pk` argument, used to identify specific model instances.
+> Reference: https://docs.djangoproject.com/en/5.0/topics/http/urls/
 
-<hr>
+---
 
-# feat(templates): implement Pomodoro timer interface with subject selector and recent session history
+## `feat(urls): add URL patterns for Topic`
 
-* **Extensão de Layout**: Herança do template base (`{% extends "layout.html" %}`) definindo o título "Pomodoro".
-* **Seleção de Matéria**: Dropdown centralizado (`subject-select`) para associar a sessão de estudo a uma matéria cadastrada pelo usuário.
-* **Display e Controles do Timer**:
-* Visor de tempo configurado para o padrão de 25 minutos (`timer-display`).
-* Indicador de estado atual (`timer-label`) e botões de ação (`Start`, `Pause`, `Reset`) com estados dinâmicos e responsivos.
-* Contador de ciclos e barra de progresso em tempo real integrada.
+Maps the three Topic API endpoints:
 
+| URL | View | Action |
+|---|---|---|
+| `topics/new/` | `topic_create` | Create a new topic |
+| `topics/<int:pk>/toggle/` | `topic_toggle` | Toggle `is_completed` status |
+| `topics/<int:pk>/delete/` | `topic_delete` | Delete a topic |
 
-* **Histórico Recente**: Listagem condicional das últimas sessões finalizadas (`recent`) contendo duração e data/hora formatada.
-* **Configuração de Scripts**: Injeção da URL de salvamento (`SAVE_URL`) e do token CSRF global para consumo pelo script front-end `pomodoro.js`.
+> **`toggle`** is designed for JavaScript `fetch` calls. It updates the database and returns a JSON response with the new status and subject progress, enabling real-time DOM updates without a page reload.
 
-<hr>
+---
 
-# feat(templates): implement weekly goals list and creation form templates
+## `feat(urls): add URL patterns for Flashcard`
 
-* **Listagem de Metas (`goals_list.html`)**:
-* **Extensão de Layout**: Herança do template base com título "Weekly Goals" e exibição formatada da data de início da semana (`week_start`).
-* **Cards de Progresso**: Grid responsivo exibindo cada meta vinculada à sua respectiva matéria, incluindo indicador de cor, contagem de horas atuais versus o alvo (`current_hours / target_hours`) e barra de progresso percentual.
-* **Ações**: Botões de exclusão individuais via formulário protegido por token CSRF e confirmação nativa.
+| URL | View | Action |
+|---|---|---|
+| `flashcards/` | `flashcard_list` | List all flashcards |
+| `flashcards/new/` | `flashcard_create` | Create a new flashcard |
+| `flashcards/review/` | `flashcard_review_session` | Start a review session |
+| `flashcards/<int:pk>/delete/` | `flashcard_delete` | Delete a flashcard |
+| `flashcards/<int:pk>/submit/` | `flashcard_submit_review` | Submit a review rating |
 
+> **`review` vs `submit`:** `review` prepares the context for the study session; `submit` is an API endpoint that receives the rating, runs `apply_review()`, and returns the updated schedule.
 
-* **Formulário de Nova Meta (`goal_create.html`)**:
-* **Estrutura de Criação**: Layout centralizado com campos para seleção de matéria (`subject_id`) e definição de horas alvo (`target_hours`) com restrições numéricas otimizadas (`min="0.5" max="40" step="0.5"`).
+---
 
-<hr>
+## `feat(urls): add URL patterns for Pomodoro`
 
-# feat(frontend): implement Pomodoro timer state machine and notification logic
+| URL | View | Action |
+|---|---|---|
+| `pomodoro/` | `pomodoro` | Render the timer interface |
+| `pomodoro/save/` | `pomodoro_save` | Save a completed session |
 
-* **Configuração e Estado**: Definição de constantes de tempo (25min de foco, pausas curtas/longas) e gerenciamento de estado global (`remainingSeconds`, `isFocus`, `cycleCount`).
-* **Funções Utilitárias**:
-* Formatação de tempo em `MM:SS` e atualização dinâmica da barra de progresso.
-* Solicitação e disparo de notificações nativas do navegador (`Notification API`).
-* Comunicação assíncrona com o back-end via `fetch` para persistir as sessões de estudo concluídas (`saveSession`).
+> **Separation of concerns:** `pomodoro` renders the page; `pomodoro_save` acts as an async callback triggered by JavaScript when the 25-minute cycle ends, persisting the session without a page reload.
 
+---
 
-* **Lógica de Fim de Ciclo (`onTimerEnd`)**: Alternância automática entre ciclos de foco e pausa (curta ou longa a cada 4 ciclos), atualizando os elementos da interface e enviando alertas sonoros/visuais.
-* **Controles do Timer**: Implementação dos ouvintes de eventos para `Start` (com validação de matéria obrigatória), `Pause` e `Reset`.
+## `feat(urls): add URL patterns for Goals`
 
-<hr>
+| URL | View | Action |
+|---|---|---|
+| `goals/` | `goals_list` | List current week's goals |
+| `goals/new/` | `goal_create` | Create a new goal |
+| `goals/<int:pk>/delete/` | `goal_delete` | Delete a goal |
 
-# feat(styles): implement global stylesheet with reset, layout components, and Pomodoro timer styling
+---
 
-* **Reset e Base**: Normalização de margens, paddings, dimensionamento de caixa (`border-box`) e definição da tipografia padrão com esquema de cores limpo para o fundo e textos.
-* **Componentes de Layout**:
-* Estilização da barra de navegação (`navbar`) responsiva com efeitos de hover nos links.
-* Definição do container centralizado principal com largura máxima e espaçamentos fluidos.
+## `feat(urls): add URL patterns for Dashboard`
 
+| URL | View | Action |
+|---|---|---|
+| `dashboard/activity/` | `dashboard_activity` | Return activity heatmap JSON |
 
-* **Formulários e Alertas**:
-* Padronização visual para inputs, textareas, selects e botões de ação com estados de foco.
-* Configuração de alertas globais, incluindo variações específicas para mensagens do Django/Bootstrap (`alert-success`, `alert-error`).
+> This endpoint acts as a **summary view**, consuming model methods (`progress()`, `current_hours()`) to generate productivity visualizations.
 
+---
 
-* **Timer Pomodoro e Responsividade**:
-* Estilização dedicada ao display do timer com fontes grandes (`.timer-display`) e uso de `font-variant-numeric: tabular-nums` para evitar o redimensionamento visual indesejado dos dígitos durante a contagem regressiva.
-* Media queries otimizadas para adaptação em dispositivos móveis (`max-width: 600px` e `400px`).
+## `feat(views): create initial view stubs for all application endpoints`
 
-<hr>
+Creates placeholder functions for every URL pattern to ensure the Django server starts without `ImportError` or `AttributeError`. Each stub returns a temporary `HttpResponse`, validating endpoint connectivity before real logic is implemented.
 
-# feat(templates): implement flashcard review, list, and creation templates
+---
 
-* **Revisão de Flashcards (`flashcard_review.html`)**:
-* **Extensão de Layout**: Herança do template base com título "Review of Flashcards".
-* **Área do Card 3D**: Interface rotativa (`flashcard-scene` e `flashcard-card`) para alternar entre a frente (pergunta) e o verso (resposta).
-* **Botões de Avaliação**: Opções de feedback dinâmicas (`Wrong`, `Hard`, `Easy`) para o algoritmo de repetição espaçada e barra de progresso em tempo real.
-* **Tela de Conclusão**: Bloco condicional oculto que exibe parabéns e atalho de retorno ao dashboard após o término da revisão diária.
+## `feat(auth): implement registration and logout logic`
 
+- **`register(request)`**
+  - `POST`: Validates `UserCreationForm`, saves the user, logs them in automatically, and redirects to `dashboard` with a success message via `django.contrib.messages`.
+  - `GET`: Renders a blank registration form.
 
-* **Listagem de Flashcards (`flashcard_list.html`)**:
-* **Filtros e Ações**: Cabeçalho com gatilho condicional para revisão imediata, botão de criação e filtro de matérias via método `GET`.
-* **Grid de Cards**: Listagem responsiva com badge de identificação de matéria, datas da próxima revisão e botões de exclusão assíncrona.
+> **Security note:** `UserCreationForm` is Django's recommended approach — it handles password validation, strength checking, and data sanitization out of the box.
+> Reference: https://docs.djangoproject.com/en/5.0/topics/auth/default/
 
+---
 
-* **Criação de Flashcard (`flashcard_create.html`)**:
-* **Formulário de Entrada**: Campos em textarea para os lados frontal e traseiro (`front` e `back`), validados e protegidos por token CSRF.
+## `feat(views): implement CRUD views for Subject model`
 
-<hr>
+- **`subjects_list`** — filters subjects by `request.user` to ensure data isolation.
+- **`subject_create`** — sanitizes input with `.strip()` and sets a default color value.
+- **`subject_detail`** — retrieves a specific subject with `get_object_or_404` and passes its topics to the template.
+- **`subject_edit`** — updates subject fields and persists changes.
+- **`subject_delete`** — processes deletion via `POST` to prevent accidental removal.
 
-# feat(styles): implement complete stylesheet with 3D flashcard flip, card hover effects, and UI components
+> **`get_object_or_404`:** Returns a 404 page automatically if the object does not exist or does not belong to the current user, preventing `DoesNotExist` server errors.
 
-* **Auth Card**: Adicionado e estruturado o componente de autenticação centralizado (`.auth-card`) com espaçamento, bordas arredondadas e sombra suave.
-* **Flashcard Flip 3D**: Implementação completa da cena e animação de rotação 3D (`perspective`, `transform-style: preserve-3d`, `backface-visibility: hidden`), com estados para a frente (`.flashcard-front`) e verso (`.flashcard-back`), incluindo ajustes responsivos.
-* **Componentes e Interações**:
-* Efeitos de transição e elevação (`translateY`) em hover para os cards da aplicação (`.card:hover`).
-* Refinamento visual para badges (`.badge`) e consistência das classes de alerta.
+---
 
-<hr>
+## `feat(views): implement CRUD views for Topic model`
 
-# feat(frontend): implement flashcard review logic with 3D flip controls, spaced repetition ratings, and progress tracking
+- **`topic_create`** — decorated with `@require_POST`; validates the parent subject belongs to the authenticated user before creating the topic.
+- **`topic_toggle`** — async API endpoint that flips `is_completed` and returns a JSON response containing the new status and the updated subject progress percentage.
+- **`topic_delete`** — removes the topic and returns JSON with deletion confirmation and the recalculated subject progress.
 
-* **Gerenciamento de Estado**: Controle do índice atual (`currentIndex`) e total de cards (`CARDS`), calculando o progresso da sessão e atualizando o contador dinamicamente.
-* **Ciclo de Vida do Card (`loadCard`)**:
-* Tratamento de conclusão da sessão com ocultação da cena 3D e exibição da tela de parabéns (`done-screen`).
-* Redefinição do estado de rotação antes de injetar os dados (`subject`, `front`, `back`) com atraso sincronizado para suavizar a transição visual.
+> Returning `progress()` in JSON responses from `toggle` and `delete` enables the frontend to update the progress bar in real time without a page reload.
 
+---
 
-* **Controles de Interação**:
-* Evento de clique para o botão "See Answer" e suporte a clique direto no card ignorando elementos internos de botões.
-* Envio assíncrono via `fetch` dos níveis de avaliação (`rating-btn`) protegidos por token CSRF e travamento temporário de botões para evitar duplo envio durante o processamento.
+## `feat(views): implement Pomodoro session management`
 
+- **`pomodoro`** — renders the timer page with the user's subject list and the 10 most recent completed sessions.
+- **`pomodoro_save`** — parses the JSON body sent by the frontend timer, creates a `PomodoroSession` instance, and returns a confirmation response.
 
-* **Inicialização Condicional**: Verificação prévia se há flashcards disponíveis no dia, ajustando o layout inicial em caso de lista vazia.
+> **`json.loads(request.body)`:** Since the timer runs client-side, `pomodoro_save` expects structured JSON rather than a standard form submission. Consider using `django.utils.timezone.now()` instead of `datetime.now()` for timezone-aware timestamps in production.
 
-<hr>
+---
 
-# feat(views): implement flashcard list, creation, review session, and SRS submission endpoints
+## `feat(views): implement WeeklyGoal CRUD operations`
 
-* **Listagem e Filtros (`flashcard_list`)**: Restringe o escopo de matérias e flashcards ao usuário autenticado (`request.user`), aplicando filtro opcional por ID de matéria via query parameters e calculando a contagem de revisões devidas para o dia.
-* **Criação de Flashcard (`flashcard_create`)**: Processa o envio via método POST de dados sanitizados (`front`, `back`), validando a propriedade da matéria vinculada antes de registrar o novo card no banco de dados.
-* **Sessão de Revisão (`flashcard_review_session`)**: Filtra os cartões pendentes de revisão com data limite menor ou igual ao dia atual, serializando os atributos principais e exportando-os em formato JSON seguro (`cards_json`).
-* **Submissão de SRS (`flashcard_submit_review`)**: Endpoint de API protegido por `@require_POST` que recebe o nível de avaliação enviado pelo front-end, registra o histórico no modelo `FlashcardReview` e aplica o algoritmo de repetição espaçada no card.
-* **Exclusão de Flashcard (`flashcard_delete`)**: Remove o registro correspondente após validar o vínculo com o usuário logado, retornando uma resposta JSON de confirmação.
+- **`goals_list`** — computes the current week's Monday using `date.today()` and `weekday()`, then filters goals for that week only.
+- **`goal_create`** — uses `update_or_create` to prevent duplicate goals for the same subject and week.
+- **`goal_delete`** — removes the goal after validating user ownership.
+
+> **Calendar logic:** `today - timedelta(days=today.weekday())` normalizes any date to its week's Monday, standardizing all database records for consistent querying.
+
+---
+
+## `feat(views): implement dashboard and activity analytics views`
+
+- **`dashboard`** — aggregates all productivity metrics: due flashcards, weekly study hours, goal progress, recent sessions, and study streak (calculated with a reverse `while` loop checking consecutive days with completed sessions).
+- **`dashboard_activity`** — API endpoint that groups completed `PomodoroSession` records by day over the last 12 weeks and returns a `JsonResponse` mapping date strings to session counts.
+
+> **Performance:** Using `.values("started_at__date")` extracts only the required field from the database, keeping the heatmap data query efficient as session volume grows.
+
+---
+
+## `fix(views): enforce authentication and HTTP method constraints`
+
+- **`@login_required`** — applied to all management views to redirect unauthenticated users to the login page.
+- **`@require_POST`** — applied to all state-changing endpoints to prevent accidental or malicious `GET` requests from modifying data.
+
+> Combined with Django's `{% csrf_token %}` template tag, `@require_POST` creates a strong defense layer against Cross-Site Request Forgery (CSRF) attacks.
+
+---
+
+## `feat(templates): implement base layout with navigation and global messaging`
+
+- **`layout.html`** — master template using Django's block inheritance system (`{% block content %}`).
+- **Navbar** — responsive Bootstrap 5 navigation with links to all modules, conditioned on `user.is_authenticated`. Logout uses a `POST` form for CSRF security.
+- **Messages** — integrates `django.contrib.messages` to display success, error, and warning alerts above each page's content block.
+- **Assets** — Bootstrap 5 CSS/JS via CDN, Bootstrap Icons, and the custom `styles.css` static file.
+
+> **Block structure:** `{% block title %}`, `{% block content %}`, and `{% block scripts %}` allow child templates to inject page-specific content without rewriting the shared layout.
+
+---
+
+## `feat(frontend): implement activity heatmap rendering`
+
+- **Fetch API** — makes an async `GET` request to `/dashboard/activity/` to retrieve the session count dictionary.
+- **Dynamic Grid** — iterates retroactively over the last 84 days (12 weeks × 7), formatting each date as `YYYY-MM-DD` to match the API keys.
+- **Color intensity mapping:**
+  - `0 sessions` → `#ebedf0` (empty)
+  - `1 session` → `#9be9a8` (light green)
+  - `2 sessions` → `#40c463` (medium green)
+  - `≥ 3 sessions` → `#216e39` (dark green)
+- **Tooltips and legend** — native `title` attributes show date and count on hover; a text legend displays the activity scale.
+
+> Replicates GitHub's contribution graph style using plain `div` elements with flexbox, consuming the JSON from `dashboard_activity`.
+
+---
+
+## `feat(templates): implement dashboard template`
+
+- Extends `layout.html`, overriding `title`, `content`, and `scripts` blocks.
+- **Summary cards** — Bootstrap grid showing `total_subjects`, `total_flashcards`, `week_hours`, and `streak`.
+- **Flashcard alert** — conditional banner when `due_cards > 0` with a direct link to the review session.
+- **Weekly goals** — dynamic progress bars colored by each goal's subject color.
+- **Recent sessions and heatmap** — session history list and the heatmap container loaded by `dashboard.js`.
+
+---
+
+## `feat(templates): implement registration and login templates`
+
+Both templates extend `layout.html` and share the same `.auth-card` layout:
+
+- `{% csrf_token %}` injected into every form for security.
+- `{{ form.as_p }}` renders all fields automatically via Django's form rendering.
+- Cross-links between login and register pages for navigation convenience.
+
+---
+
+## `fix(config): configure static files and authentication redirect paths`
+
+- **Static files** — added `STATIC_URL` and `STATIC_ROOT = BASE_DIR / 'staticfiles'` for `collectstatic` support in production.
+- **Auth redirects** — defined `LOGIN_URL`, `LOGIN_REDIRECT_URL = "/"`, and `LOGOUT_REDIRECT_URL = "/login/"` to control session flow automatically.
+- **Root URL config** — added `path('', include('core.urls'))` to connect the central router to the `core` app.
+
+---
+
+## `feat(templates): implement subjects list, form, detail, and delete confirmation templates`
+
+- **`subjects/list.html`** — responsive card grid (`col-12 col-md-6 col-lg-4`) with color indicator, progress bar, and quick action buttons. Includes an empty state for new users.
+- **`subjects/form.html`** — shared create/edit form with a dynamic title (`{{ action }}`), optional description field, and a color picker input (`type="color"`).
+- **`subjects/detail.html`** — inline topic creation form, interactive checkbox list with strike-through for completed items, and delete buttons. Injects `TOGGLE_URL`, `DELETE_URL`, and `CSRF_TOKEN` as global JS variables for `topics.js`.
+- **`subjects/confirm_delete.html`** — danger card with the subject name and a warning about cascading deletion of all linked topics, flashcards, and sessions.
+
+---
+
+## `feat(frontend): implement asynchronous topic toggle and deletion`
+
+- **Toggle** — listens to `change` events on topic checkboxes, sends a `POST` via the Fetch API with the CSRF token, and updates the topic's visual state (strike-through text) and the subject's progress bar/badge in real time.
+- **Delete** — listens to delete button clicks, shows a native `confirm()` dialog, sends a `DELETE` request, and removes the topic element from the DOM on success.
+
+---
+
+## `feat(templates): implement Pomodoro timer interface`
+
+- **Subject selector** — dropdown to associate the session with a subject before starting.
+- **Timer display** — large countdown using the `.timer-display` class, with a state label and cycle counter badge.
+- **Controls** — Start, Pause, and Reset buttons with dynamic `disabled` states managed by JavaScript.
+- **Progress bar** — fills in real time as the cycle progresses.
+- **Session history** — conditional list of recent completed sessions with subject color, duration, and timestamp.
+- **Script injection** — `SAVE_URL` and `CSRF_TOKEN` passed as global JS variables for `pomodoro.js`.
+
+---
+
+## `feat(templates): implement weekly goals list and form templates`
+
+- **`goals/list.html`** — responsive card grid showing each goal's subject color, `current_hours / target_hours`, and a dynamic progress bar. Delete buttons use a `POST` form with CSRF token and `confirm()` dialog.
+- **`goals/form.html`** — subject dropdown and an hours input with step increments of 0.5, min of 0.5, and max of 40.
+
+---
+
+## `feat(frontend): implement Pomodoro timer state machine`
+
+- **State variables** — `remainingSeconds`, `isFocus`, `cycleCount`, and `timerInterval` manage the full timer lifecycle.
+- **Utility functions** — `formatTime()` formats seconds as `MM:SS`; `updateDisplay()` updates the DOM and progress bar; `sendNotification()` fires a browser notification if permission is granted.
+- **`onTimerEnd()`** — handles cycle completion: saves the session via `fetch POST`, alternates between focus and break phases (short break every cycle, long break every 4th), and updates all UI elements.
+- **Controls** — Start (validates subject selection and requests notification permission), Pause (`clearInterval`), and Reset (restores all state to defaults).
+
+---
+
+## `feat(styles): implement complete stylesheet`
+
+- **CSS variables** — five-color palette defined in `:root` for consistent theming across all components.
+- **Reset and base** — normalizes margins, padding, and box sizing; sets body background and text color from the palette.
+- **Layout components** — navbar, container, cards with hover lift effect, Bootstrap overrides for buttons, badges, alerts, progress bars, list groups, and form controls.
+- **Flashcard 3D flip** — `perspective`, `transform-style: preserve-3d`, `backface-visibility: hidden` on `.flashcard-face`; `.is-flipped` triggers `rotateY(180deg)` on `.flashcard-card`.
+- **Pomodoro timer** — `.timer-display` uses `font-variant-numeric: tabular-nums` to prevent digit-width jitter during countdown.
+- **Mobile responsive** — media queries at `600px` and `400px` scale the navbar, container padding, auth card, flashcard scene, and timer display.
+
+---
+
+## `feat(templates): implement flashcard list, form, and review session templates`
+
+- **`flashcards/list.html`** — filterable card grid with a subject `GET` filter, per-card due-today badge, and async delete via inline JavaScript.
+- **`flashcards/form.html`** — textarea fields for `front` and `back`, subject dropdown, and CSRF-protected `POST` form.
+- **`flashcards/review.html`** — 3D flip card scene (`.flashcard-scene` > `.flashcard-card` > `.flashcard-front` / `.flashcard-back`), rating buttons (`easy`, `hard`, `wrong`), session progress bar, and a hidden completion screen revealed when the queue is exhausted. Injects `CARDS` (JSON), `SUBMIT_URL`, and `CSRF_TOKEN` as global JS variables.
+
+---
+
+## `feat(frontend): implement flashcard review session logic`
+
+- **State management** — tracks `currentIndex` against the total `CARDS` array length; updates the counter and progress bar after each rating.
+- **`loadCard(index)`** — checks for session completion, removes the `.is-flipped` class, then updates `subject`, `front`, and `back` after a 280ms delay to sync with the CSS transition.
+- **Flip controls** — the "See Answer" button and a direct card click both toggle `.is-flipped`; clicks on inner buttons are excluded via `e.target.tagName` check.
+- **Rating submission** — disables all rating buttons during the `fetch POST` to prevent double submission; re-enables them and advances the queue on success.
+- **Empty state handling** — if `CARDS` is empty on load, the card scene is hidden and the completion screen is shown immediately.
+
+---
+
+## `feat(views): implement flashcard views`
+
+- **`flashcard_list`** — scopes both subjects and flashcards to `request.user`; supports optional `?subject=` query parameter for filtering; calculates due card count for the alert banner.
+- **`flashcard_create`** — sanitizes `front` and `back` inputs, validates subject ownership, and creates the `Flashcard` instance.
+- **`flashcard_review_session`** — filters cards where `next_review_date <= today`, serializes `id`, `front`, `back`, and `subject` to JSON, and passes it safely to the template context.
+- **`flashcard_submit_review`** — `@require_POST` endpoint that parses the rating from the JSON body, creates a `FlashcardReview` record, calls `apply_review()`, and returns the updated schedule as JSON.
+- **`flashcard_delete`** — validates ownership and removes the card, returning a JSON confirmation.
