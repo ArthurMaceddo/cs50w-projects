@@ -31,13 +31,13 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background-color: var(--white-ice);  /* was #f5f7fa */
-    color: var(--dark-wine);             /* was #333 */
+    background-color: var(--white-ice);  
+    color: var(--dark-wine);            
 }
 
 /* ===== NAVBAR ===== */
 .navbar {
-    background-color: var(--blue-dark) !important;  /* was #2c3e50 */
+    background-color: var(--blue-dark) !important; 
     border-bottom: 3px solid var(--blue-mid);
     padding: 1rem 2rem;
     display: flex;
@@ -48,7 +48,7 @@ body {
 }
 
 .navbar-brand {
-    color: var(--white-ice) !important;  /* was white */
+    color: var(--white-ice) !important; 
     text-decoration: none;
     font-size: 1.2rem;
     font-weight: bold;
@@ -65,7 +65,7 @@ body {
 }
 
 .navbar-links a {
-    color: rgba(244, 244, 242, 0.8);  /* was #bdc3c7 */
+    color: rgba(244, 244, 242, 0.8); 
     text-decoration: none;
     font-size: 0.95rem;
     transition: color 0.2s;
@@ -74,7 +74,7 @@ body {
 }
 
 .navbar-links a:hover {
-    color: var(--white-ice);  /* was white */
+    color: var(--white-ice);  
     background-color: rgba(91, 136, 165, 0.2);
 }
 
@@ -137,8 +137,8 @@ main.container {
 
 /* Default alert (without Bootstrap) */
 .alert:not([class*="alert-"]) {
-    background-color: #d6ede9;  /* was #d4edda */
-    color: #1e5248;             /* was #155724 */
+    background-color: #d6ede9;  
+    color: #1e5248;            
 }
 
 /* ===== BOOTSTRAP ALERTS ===== */
@@ -171,21 +171,21 @@ main.container {
 .auth-card {
     max-width: 420px;
     margin: 3rem auto;
-    background: var(--beige);     /* was white */
+    background: var(--beige);    
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(25, 16, 19, 0.1);  /* was rgba(0,0,0,0.08) */
+    box-shadow: 0 2px 10px rgba(25, 16, 19, 0.1);  
 }
 
 .auth-card h2 {
     margin-bottom: 1.5rem;
-    color: var(--blue-dark);  /* was #2c3e50 */
+    color: var(--blue-dark); 
 }
 
 .auth-card p {
     margin-top: 1rem;
     font-size: 0.9rem;
-    color: var(--text-muted-custom);  /* was #666 */
+    color: var(--text-muted-custom);
 }
 
 /* ===== FORMS ===== */
@@ -206,7 +206,7 @@ form input, form textarea, form select,
 .form-control, .form-select {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    border: 1.5px solid var(--beige-hover);  /* was #ddd */
+    border: 1.5px solid var(--beige-hover); 
     border-radius: 7px;
     font-size: 0.95rem;
     background-color: var(--white-ice);
@@ -216,7 +216,7 @@ form input, form textarea, form select,
 form input:focus, form textarea:focus,
 .form-control:focus, .form-select:focus {
     outline: none;
-    border-color: var(--blue-mid);  /* was #3498db */
+    border-color: var(--blue-mid); 
     box-shadow: 0 0 0 3px rgba(91, 136, 165, 0.2);
     background-color: var(--white-ice);
     color: var(--dark-wine);
@@ -235,7 +235,7 @@ form input:focus, form textarea:focus,
 
 /* ===== BUTTONS ===== */
 button[type="submit"], .btn {
-    background-color: var(--blue-dark);  /* was #3498db */
+    background-color: var(--blue-dark);  
     color: var(--white-ice);
     border: none;
     padding: 0.6rem 1.4rem;
@@ -246,7 +246,7 @@ button[type="submit"], .btn {
 }
 
 button[type="submit"]:hover, .btn:hover {
-    background-color: var(--blue-dark-hover);  /* was #2980b9 */
+    background-color: var(--blue-dark-hover); 
 }
 
 /* Bootstrap buttons */
@@ -337,7 +337,7 @@ button[type="submit"]:hover, .btn:hover {
 
 /* ===== CARDS ===== */
 .card {
-    background-color: var(--beige);   /* was Bootstrap default white */
+    background-color: var(--beige);  
     border: none !important;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(25, 16, 19, 0.08);
@@ -457,17 +457,17 @@ hr {
     height: 100%;
     backface-visibility: hidden;
     border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(25, 16, 19, 0.12);  /* was rgba(0,0,0,0.12) */
+    box-shadow: 0 4px 16px rgba(25, 16, 19, 0.12); 
 }
 
 .flashcard-front {
-    background-color: var(--white-ice);  /* was #ffffff */
-    border: 2px solid var(--beige-hover); /* was #e9ecef */
+    background-color: var(--white-ice); 
+    border: 2px solid var(--beige-hover); 
 }
 
 .flashcard-back {
-    background-color: var(--beige);       /* was #f8f9fa */
-    border: 2px solid var(--blue-mid);    /* was #dee2e6 */
+    background-color: var(--beige);    
+    border: 2px solid var(--blue-mid);  
     transform: rotateY(180deg);
 }
 
@@ -484,7 +484,7 @@ hr {
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     letter-spacing: 4px;
-    color: var(--blue-dark);  /* was #2c3e50 */
+    color: var(--blue-dark);  
     line-height: 1;
 }
 
